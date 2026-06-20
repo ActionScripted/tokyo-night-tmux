@@ -44,12 +44,15 @@ zoom_id_style="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_zoom_id_style' | cu
 terminal_icon="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_terminal_icon' | cut -d" " -f2)"
 active_terminal_icon="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_active_terminal_icon' | cut -d" " -f2)"
 window_tidy="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_window_tidy_icons' | cut -d" " -f2)"
+prefix_color="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_prefix_color' | cut -d" " -f2)"
 
 window_id_style="${window_id_style:-$default_window_id_style}"
 pane_id_style="${pane_id_style:-$default_pane_id_style}"
 zoom_id_style="${zoom_id_style:-$default_zoom_id_style}"
 terminal_icon="${terminal_icon:-$default_terminal_icon}"
 active_terminal_icon="${active_terminal_icon:-$default_active_terminal_icon}"
+prefix_bg="${THEME[blue]}"
+[[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
 
 [[ "$terminal_icon" == "none" ]] && terminal_icon=""
 [[ "$active_terminal_icon" == "none" ]] && active_terminal_icon=""
@@ -86,7 +89,7 @@ hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 
 #+--- Bars LEFT ---+
 # Session name
-tmux set -g status-left "#[fg=${THEME[bblack]},bg=${THEME[blue]},bold] #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname "
+tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]},bg=${prefix_bg},bold],#[fg=${THEME[bblack]},bg=${THEME[blue]},bold]} #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname "
 
 #+--- Windows ---+
 # Focus
