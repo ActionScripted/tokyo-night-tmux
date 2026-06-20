@@ -17,7 +17,7 @@ tmux set -g status-right-length 150
 
 RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounderscore,nodim]"
 # Highlight / completion colors
-tmux set -g mode-style "fg=${THEME[background]},bg=${THEME[blue]}"
+tmux set -g mode-style "fg=${THEME[foreground]},bg=${THEME[black]}"
 tmux set -ga terminal-overrides ",*:Cs=\\E]12;%p1%s\\007:Cr=\\E]112\\007"
 tmux setw -g cursor-colour "${THEME[blue]}"
 tmux set -g menu-style "fg=${THEME[foreground]},bg=${THEME[background]}"
@@ -26,6 +26,7 @@ tmux set -g menu-border-style "fg=${THEME[blue]}"
 
 tmux set -g message-style "bg=${THEME[bblue]},fg=${THEME[bblack]},bold"
 tmux set -g message-command-style "fg=${THEME[bblue]},bg=${THEME[bblack]},bold"
+tmux bind : command-prompt -p "  :"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
 tmux set -g pane-active-border-style "fg=${THEME[blue]}"
