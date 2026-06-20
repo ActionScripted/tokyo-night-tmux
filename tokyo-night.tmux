@@ -89,7 +89,7 @@ hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 
 #+--- Bars LEFT ---+
 # Session name
-tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]},bg=${prefix_bg},bold],#[fg=${THEME[bblack]},bg=${THEME[blue]},bold]} #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname "
+tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]}]#[bg=${prefix_bg}]#[bold],#[fg=${THEME[bblack]}]#[bg=${THEME[blue]}]#[bold]} #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname "
 
 #+--- Windows ---+
 # Focus
