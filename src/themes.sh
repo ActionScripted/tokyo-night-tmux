@@ -14,8 +14,8 @@ case $SELECTED_THEME in
     ["green"]="#4fd6be"
     ["magenta"]="#c099ff"
     ["red"]="#ff757f"
-    ["white"]="#828bb8"
-    ["yellow"]="#e0af68"
+    ["white"]="#c8d3f5"
+    ["yellow"]="#ffc777"
 
     ["bblack"]="#444a73"
     ["bblue"]="#82aaff"
@@ -24,7 +24,7 @@ case $SELECTED_THEME in
     ["bmagenta"]="#c099ff"
     ["bred"]="#ff757f"
     ["bwhite"]="#787c99"
-    ["byellow"]="#e0af68"
+    ["byellow"]="#ffc777"
   )
   ;;
 "storm")
