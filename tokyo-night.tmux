@@ -50,6 +50,24 @@ pane_id_style="${pane_id_style:-$default_pane_id_style}"
 zoom_id_style="${zoom_id_style:-$default_zoom_id_style}"
 terminal_icon="${terminal_icon:-$default_terminal_icon}"
 active_terminal_icon="${active_terminal_icon:-$default_active_terminal_icon}"
+
+[[ "$terminal_icon" == "none" ]] && terminal_icon=""
+[[ "$active_terminal_icon" == "none" ]] && active_terminal_icon=""
+
+SSH_ICON="󰣀"
+
+if [[ -n "$terminal_icon" ]]; then
+    terminal_icon_status="#{?#{==:#{pane_current_command},ssh},$SSH_ICON , $terminal_icon }"
+else
+    terminal_icon_status=""
+fi
+
+if [[ -n "$active_terminal_icon" ]]; then
+    active_terminal_icon_status="#{?#{==:#{pane_current_command},ssh},$SSH_ICON , $active_terminal_icon }"
+else
+    active_terminal_icon_status=""
+fi
+
 window_space="${window_tidy:-0}"
 
 window_space=$([[ $window_tidy == "0" ]] && echo " " || echo "")
@@ -72,9 +90,9 @@ tmux set -g status-left "#[fg=${THEME[bblack]},bg=${THEME[blue]},bold] #{?client
 
 #+--- Windows ---+
 # Focus
-tmux set -g window-status-current-format "$RESET#[fg=${THEME[green]},bg=${THEME[bblack]}] #{?#{==:#{pane_current_command},ssh},󰣀 ,  }#[fg=${THEME[foreground]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag, $zoom_number, $custom_pane}#{?window_last_flag, , }"
+tmux set -g window-status-current-format "$RESET#[fg=${THEME[green]},bg=${THEME[bblack]}] $active_terminal_icon_status#[fg=${THEME[foreground]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag, $zoom_number, $custom_pane}#{?window_last_flag, , }"
 # Unfocused
-tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] #{?#{==:#{pane_current_command},ssh},󰣀 ,  }${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag, $zoom_number, $custom_pane}#[fg=${THEME[yellow]}]#{?window_last_flag,󰁯  , }"
+tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag, $zoom_number, $custom_pane}#[fg=${THEME[yellow]}]#{?window_last_flag,󰁯  , }"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"

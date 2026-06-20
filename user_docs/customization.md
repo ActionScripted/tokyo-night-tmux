@@ -43,7 +43,12 @@ set -g @tokyo-night-tmux_terminal_icon        # icon for inactive windows (defau
 set -g @tokyo-night-tmux_active_terminal_icon  # icon for the active window (default: )
 ```
 
-Any Nerd Fonts glyph can be used. Copy the glyph character directly into your config.
+Any Nerd Fonts glyph can be used. Copy the glyph character directly into your config. Set to `none` to hide the icon entirely:
+
+```bash
+set -g @tokyo-night-tmux_terminal_icon none
+set -g @tokyo-night-tmux_active_terminal_icon none
+```
 
 ### Tidy icons
 
