@@ -105,7 +105,7 @@ tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]}]#[bg=${prefix_bg
 
 #+--- Windows ---+
 # Focus
-tmux set -g window-status-current-format "$RESET#[fg=${THEME[bblack]},bg=${THEME[magenta]}] $active_terminal_icon_status#[fg=${THEME[foreground]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }"
+tmux set -g window-status-current-format "$RESET#[fg=${THEME[bblack]},bg=${THEME[magenta]}] $active_terminal_icon_status#[fg=${THEME[black]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }"
 # Unfocused
 tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#[fg=${THEME[yellow]}]#{?window_last_flag, 󰁯 , }"
 
