@@ -20,7 +20,7 @@ RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounde
 tmux set -g mode-style "fg=${THEME[bgreen]},bg=${THEME[bblack]}"
 
 tmux set -g message-style "bg=${THEME[green]},fg=${THEME[bblack]}"
-tmux set -g message-command-style "fg=${THEME[green]},bg=${THEME[bblack]}"
+tmux set -g message-command-style "fg=${THEME[bblue]},bg=${THEME[bblack]},bold"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
 tmux set -g pane-active-border-style "fg=${THEME[blue]}"
@@ -107,7 +107,7 @@ tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]}]#[bg=${prefix_bg
 # Focus
 tmux set -g window-status-current-format "$RESET#[fg=${THEME[bblack]},bg=${THEME[magenta]}] $active_terminal_icon_status#[fg=${THEME[black]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }"
 # Unfocused
-tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#[fg=${THEME[yellow]}]#{?window_last_flag, 󰁯 , }"
+tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}]󰁯 , }"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
