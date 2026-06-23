@@ -10,15 +10,17 @@ Widgets appear in the tmux status bar. All widgets are **disabled by default** u
 
 ## Date & Time
 
-> Enabled by default.
+> Disabled by default.
 
 Displays current date and time in the status bar.
 
 ```bash
-set -g @tokyo-night-tmux_show_datetime 1   # 1 = enabled (default) | 0 = disabled
+set -g @tokyo-night-tmux_show_datetime 1   # 1 = enabled | 0 = disabled (default)
 set -g @tokyo-night-tmux_date_format YMD   # see options below
 set -g @tokyo-night-tmux_time_format 24H   # see options below
 ```
+
+Set `@tokyo-night-tmux_show_datetime` to `1` to enable it.
 
 ### Date format options
 

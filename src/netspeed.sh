@@ -4,10 +4,6 @@
 # email : freakybytes@duck.com
 #<------------------------------------------------------------------------------------------>
 
-# Check if enabled
-ENABLED=$(tmux show-option -gv @tokyo-night-tmux_show_netspeed 2>/dev/null)
-[[ ${ENABLED} -ne 1 ]] && exit 0
-
 # Imports
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 source "$ROOT_DIR/src/themes.sh"
@@ -34,7 +30,7 @@ NET_ICONS[ip]="#[fg=${THEME[foreground]}]\U000f0a5f"       # nf-md-ip
 # Determine interface if not set
 if [[ -z $INTERFACE ]]; then
   INTERFACE=$(find_interface)
-  [[ -z $INTERFACE ]] && exit 1
+  [[ -z $INTERFACE ]] && exit 0
   # Update tmux option for this session
   tmux set-option -g @tokyo-night-tmux_netspeed_iface "$INTERFACE"
 fi

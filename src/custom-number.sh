@@ -25,8 +25,7 @@ if [ "$FORMAT" = "hide" ]; then
 fi
 
 if [ -z "$format" ]; then
-  echo "Invalid format: $FORMAT"
-  exit 1
+  format="$format_none"
 fi
 
 # If format is roman numerals (-r), only handle IDs of 1 digit

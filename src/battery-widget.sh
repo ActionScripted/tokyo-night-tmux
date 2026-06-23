@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# Check if the battery widget is enabled
-ENABLED=$(tmux show-option -gv @tokyo-night-tmux_show_battery_widget 2>/dev/null)
-[[ ${ENABLED} -ne 1 ]] && exit 0
-
 # Imports
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 . "${ROOT_DIR}/lib/coreutils-compat.sh"

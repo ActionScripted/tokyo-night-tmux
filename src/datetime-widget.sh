@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# Check if enabled
-ENABLED=$(tmux show-option -gv @tokyo-night-tmux_show_datetime 2>/dev/null)
-[[ ${ENABLED} -ne 1 ]] && exit 0
-
 # Imports
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 . "${ROOT_DIR}/lib/coreutils-compat.sh"

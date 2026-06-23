@@ -34,7 +34,23 @@ tmux set -g pane-border-status off
 tmux set -g status-style bg="${THEME[background]}"
 tmux set -g popup-border-style "fg=${THEME[blue]}"
 
-TMUX_VARS="$(tmux show -g)"
+TMUX_VARS="$(tmux show -g 2>/dev/null || true)"
+
+tmux_get_var() {
+    local key="$1"
+    awk -v key="$key" '$1 == key { print $2; exit }' <<<"$TMUX_VARS"
+}
+
+is_enabled() {
+    case "${1,,}" in
+    1 | on | yes | true)
+        return 0
+        ;;
+    *)
+        return 1
+        ;;
+    esac
+}
 
 default_window_id_style="digital"
 default_pane_id_style="hsquare"
@@ -43,18 +59,35 @@ default_zoom_id_style="dsquare"
 default_terminal_icon=""
 default_active_terminal_icon=""
 
-active_terminal_icon="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_active_terminal_icon' | cut -d" " -f2)"
-pane_id_style="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_pane_id_style' | cut -d" " -f2)"
-prefix_color="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_prefix_color' | cut -d" " -f2)"
-terminal_icon="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_terminal_icon' | cut -d" " -f2)"
-window_id_style="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_window_id_style' | cut -d" " -f2)"
-zoom_id_style="$(echo "$TMUX_VARS" | grep '@tokyo-night-tmux_zoom_id_style' | cut -d" " -f2)"
+active_terminal_icon="$(tmux_get_var '@tokyo-night-tmux_active_terminal_icon')"
+pane_id_style="$(tmux_get_var '@tokyo-night-tmux_pane_id_style')"
+prefix_color="$(tmux_get_var '@tokyo-night-tmux_prefix_color')"
+show_battery_widget="$(tmux_get_var '@tokyo-night-tmux_show_battery_widget')"
+show_datetime="$(tmux_get_var '@tokyo-night-tmux_show_datetime')"
+show_git="$(tmux_get_var '@tokyo-night-tmux_show_git')"
+show_hostname="$(tmux_get_var '@tokyo-night-tmux_show_hostname')"
+show_music="$(tmux_get_var '@tokyo-night-tmux_show_music')"
+show_netspeed="$(tmux_get_var '@tokyo-night-tmux_show_netspeed')"
+show_path="$(tmux_get_var '@tokyo-night-tmux_show_path')"
+show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
+terminal_icon="$(tmux_get_var '@tokyo-night-tmux_terminal_icon')"
+window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
+zoom_id_style="$(tmux_get_var '@tokyo-night-tmux_zoom_id_style')"
 
 active_terminal_icon="${active_terminal_icon:-$default_active_terminal_icon}"
 pane_id_style="${pane_id_style:-$default_pane_id_style}"
 terminal_icon="${terminal_icon:-$default_terminal_icon}"
 window_id_style="${window_id_style:-$default_window_id_style}"
 zoom_id_style="${zoom_id_style:-$default_zoom_id_style}"
+
+show_battery_widget="${show_battery_widget:-0}"
+show_datetime="${show_datetime:-0}"
+show_git="${show_git:-0}"
+show_hostname="${show_hostname:-0}"
+show_music="${show_music:-0}"
+show_netspeed="${show_netspeed:-0}"
+show_path="${show_path:-0}"
+show_wbg="${show_wbg:-0}"
 
 prefix_bg="${THEME[blue]}"
 [[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
@@ -76,11 +109,7 @@ else
     active_terminal_icon_status=""
 fi
 
-cmus_status="#($SCRIPTS_PATH/music-tmux-statusbar.sh)"
 custom_pane="#($SCRIPTS_PATH/custom-number.sh #P $pane_id_style)"
-git_status="#($SCRIPTS_PATH/git-status.sh #{pane_current_path})"
-netspeed="#($SCRIPTS_PATH/netspeed.sh)"
-wb_git_status="#($SCRIPTS_PATH/wb-git-status.sh #{pane_current_path} &)"
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
 zoom_number="#($SCRIPTS_PATH/custom-number.sh #P $zoom_id_style)"
 
@@ -96,10 +125,29 @@ else
     zoom_expr=" $zoom_number"
 fi
 
-battery_status="#($SCRIPTS_PATH/battery-widget.sh)"
-current_path="#($SCRIPTS_PATH/path-widget.sh #{pane_current_path})"
-date_and_time="#($SCRIPTS_PATH/datetime-widget.sh)"
-hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
+cmus_status=""
+is_enabled "$show_music" && cmus_status="#($SCRIPTS_PATH/music-tmux-statusbar.sh)"
+
+git_status=""
+is_enabled "$show_git" && git_status="#($SCRIPTS_PATH/git-status.sh #{pane_current_path})"
+
+netspeed=""
+is_enabled "$show_netspeed" && netspeed="#($SCRIPTS_PATH/netspeed.sh)"
+
+wb_git_status=""
+is_enabled "$show_wbg" && wb_git_status="#($SCRIPTS_PATH/wb-git-status.sh #{pane_current_path} &)"
+
+battery_status=""
+is_enabled "$show_battery_widget" && battery_status="#($SCRIPTS_PATH/battery-widget.sh)"
+
+current_path=""
+is_enabled "$show_path" && current_path="#($SCRIPTS_PATH/path-widget.sh #{pane_current_path})"
+
+date_and_time=""
+is_enabled "$show_datetime" && date_and_time="#($SCRIPTS_PATH/datetime-widget.sh)"
+
+hostname=""
+is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 
 #+--- Bars LEFT ---+
 # Session name

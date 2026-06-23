@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
-ENABLED=$(tmux show-option -gv @tokyo-night-tmux_show_wbg)
-[[ ${ENABLED} -ne 1 ]] && exit 0
-
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CURRENT_DIR/../lib/coreutils-compat.sh"
 source "$CURRENT_DIR/themes.sh"
 
-cd "$1" || exit 1
+cd "$1" 2>/dev/null || exit 0
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 PROVIDER=$(git config remote.origin.url | sed 's|https://||' | sed 's|git@||' | awk -F'[:/]' '{print $1}')
 
@@ -29,7 +26,7 @@ fi
 
 if [[ $PROVIDER == "github.com" ]]; then
   if ! command -v gh &>/dev/null; then
-    exit 1
+    exit 0
   fi
   PROVIDER_ICON="$RESET#[fg=${THEME[foreground]}] "
   PR_COUNT=$(gh pr list --json number --jq 'length' | bc)
@@ -40,7 +37,7 @@ if [[ $PROVIDER == "github.com" ]]; then
   ISSUE_COUNT=$((ISSUE_COUNT - BUG_COUNT))
 elif [[ $PROVIDER == "gitlab.com" ]]; then
   if ! command -v glab &>/dev/null; then
-    exit 1
+    exit 0
   fi
   PROVIDER_ICON="$RESET#[fg=#fc6d26] "
   PR_COUNT=$(glab mr list | grep -cE "^\!")

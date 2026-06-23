@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-# Check if enabled
-ENABLED=$(tmux show-option -gv @tokyo-night-tmux_show_git)
-[[ ${ENABLED} -ne 1 ]] && exit 0
-
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CURRENT_DIR/../lib/coreutils-compat.sh"
 source "$CURRENT_DIR/themes.sh"
 
-cd "$1" || exit 1
+cd "$1" 2>/dev/null || exit 0
 RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounderscore,nodim]"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 STATUS=$(git status --porcelain 2>/dev/null | grep -cE "^(M| M)")
