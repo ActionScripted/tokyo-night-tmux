@@ -76,6 +76,7 @@ set -g @plugin "ActionScripted/tokyo-night-tmux"
 ```bash
 set -g @tokyo-night-tmux_theme night   # night (default) | storm | moon | day
 set -g @tokyo-night-tmux_transparent 1 # transparent background
+set -g @tokyo-night-tmux_status_divider 0 # divider line under/above status bar (default: 1)
 ```
 
 ### 4. Enable widgets *(optional)*
