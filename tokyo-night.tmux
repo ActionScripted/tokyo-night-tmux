@@ -71,6 +71,7 @@ show_hostname="$(tmux_get_var '@tokyo-night-tmux_show_hostname')"
 show_music="$(tmux_get_var '@tokyo-night-tmux_show_music')"
 show_netspeed="$(tmux_get_var '@tokyo-night-tmux_show_netspeed')"
 show_path="$(tmux_get_var '@tokyo-night-tmux_show_path')"
+show_status_divider="$(tmux_get_var '@tokyo-night-tmux_status_divider')"
 show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
 terminal_icon="$(tmux_get_var '@tokyo-night-tmux_terminal_icon')"
 window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
@@ -89,6 +90,7 @@ show_hostname="${show_hostname:-0}"
 show_music="${show_music:-0}"
 show_netspeed="${show_netspeed:-0}"
 show_path="${show_path:-0}"
+show_status_divider="${show_status_divider:-1}"
 show_wbg="${show_wbg:-0}"
 
 prefix_bg="${THEME[blue]}"
@@ -171,6 +173,12 @@ if [[ -z "$status_primary_format" ]]; then
     tmux set -gq @tokyo-night-tmux_status_primary_format "$status_primary_format"
 fi
 
-tmux set -g status 2
-tmux set -g status-format[0] "#{?#{==:#{status-position},top},#{E:@tokyo-night-tmux_status_primary_format},$status_divider_format}"
-tmux set -g status-format[1] "#{?#{==:#{status-position},top},$status_divider_format,#{E:@tokyo-night-tmux_status_primary_format}}"
+if is_enabled "$show_status_divider"; then
+    tmux set -g status 2
+    tmux set -g status-format[0] "#{?#{==:#{status-position},top},#{E:@tokyo-night-tmux_status_primary_format},$status_divider_format}"
+    tmux set -g status-format[1] "#{?#{==:#{status-position},top},$status_divider_format,#{E:@tokyo-night-tmux_status_primary_format}}"
+else
+    tmux set -g status on
+    tmux set -g status-format[0] "#{E:@tokyo-night-tmux_status_primary_format}"
+    tmux set -g status-format[1] ""
+fi
