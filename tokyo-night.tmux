@@ -160,9 +160,9 @@ tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]},bg=${prefix_bg},
 
 #+--- Windows ---+
 # Focus
-tmux set -g window-status-current-format "$RESET#[fg=${THEME[background]},bg=${THEME[magenta]}]$SEPARATOR#[fg=${THEME[black]},bg=${THEME[magenta]},bold,nodim] $active_terminal_icon_status$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }#[fg=${THEME[magenta]},bg=${THEME[background]}]$SEPARATOR"
+tmux set -g window-status-current-format "$RESET#[fg=${THEME[black]},bg=${THEME[magenta]},bold,nodim] $active_terminal_icon_status$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }#[fg=${THEME[magenta]},bg=${THEME[background]}]$SEPARATOR"
 # Unfocused
-tmux set -g window-status-format "$RESET#[fg=${THEME[background]},bg=${THEME[bblack]}]$SEPARATOR#[fg=${THEME[foreground]},bg=${THEME[bblack]}] $terminal_icon_status$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}] 󰁯 , }#[fg=${THEME[bblack]},bg=${THEME[background]}]$SEPARATOR"
+tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]},bg=${THEME[bblack]}] $terminal_icon_status$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}] 󰁯 , }#[fg=${THEME[bblack]},bg=${THEME[background]}]$SEPARATOR"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
