@@ -2,57 +2,59 @@
 
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$CURRENT_DIR/themes.sh"
+# Sourced for custom_number(): formatting in-process avoids a fork+exec per
+# window, which keeps this script fast enough to run on every refresh hook.
+source "$CURRENT_DIR/custom-number.sh"
 
-terminal_icon="$1"
-active_terminal_icon="$2"
-window_id_style="$3"
-pane_id_style="$4"
-zoom_id_style="$5"
+# Glyphs are written with \u escapes so they survive editors/tools that mangle
+# raw private-use codepoints.
+SEPARATOR=$'\ue0b0'      #
+SSH_ICON=$'\U000f08c0'   # 󰣀
+LAST_MARKER=$'\U000f006f' # 󰁯
 
-SEPARATOR=""
-SSH_ICON="󰣀"
+# Config is read from a single packed option so the activity/selection hooks can
+# invoke this script with no arguments.
+IFS='|' read -r terminal_icon active_terminal_icon window_id_style pane_id_style zoom_id_style \
+  < <(tmux show -gqv @tokyo-night-tmux_tab_opts)
 
+STRIP_OPTION="@tokyo-night-tmux_window_strip"
+
+# These assign to globals (TAB_BG / TAB_FG) instead of printing so the render
+# loop can call them without a subshell per window.
 tab_bg() {
-  local active="$1"
-  local activity="$2"
-  local bell="$3"
-  local last="$4"
-
+  local active="$1" activity="$2" bell="$3" last="$4"
   if [[ "$active" == "1" ]]; then
-    printf '%s' "${THEME[magenta]}"
+    TAB_BG="${THEME[magenta]}"
   elif [[ "$bell" == "1" ]]; then
-    printf '%s' "${THEME[red]}"
+    TAB_BG="${THEME[red]}"
   elif [[ "$activity" == "1" ]]; then
-    printf '%s' "${THEME[cyan]}"
+    TAB_BG="${THEME[cyan]}"
   elif [[ "$last" == "1" ]]; then
-    printf '%s' "${THEME[yellow]}"
+    TAB_BG="${THEME[yellow]}"
   else
-    printf '%s' "${THEME[bblack]}"
+    TAB_BG="${THEME[bblack]}"
   fi
 }
 
 tab_fg() {
-  local active="$1"
-  local activity="$2"
-  local bell="$3"
-  local last="$4"
-
+  local active="$1" activity="$2" bell="$3" last="$4"
   if [[ "$active" == "1" || "$activity" == "1" || "$bell" == "1" || "$last" == "1" ]]; then
-    printf '%s' "${THEME[black]}"
+    TAB_FG="${THEME[black]}"
   else
-    printf '%s' "${THEME[foreground]}"
+    TAB_FG="${THEME[foreground]}"
   fi
 }
 
-# Render the whole window strip in a single pass.
+# Render the whole window strip in a single pass and store it in a tmux option.
 #
-# Each tab's trailing separator (the powerline arrow) is coloured fg=this-tab,
-# bg=next-tab so adjacent tabs connect seamlessly. That makes a tab's separator
-# depend on its NEIGHBOUR's colour. When every tab was rendered as its own #()
-# job, tmux only re-ran a tab's job when that tab's own state changed — not when
-# its neighbour changed — so opening/switching windows left separators showing
-# stale neighbour colours. Reading every window from one list-windows snapshot
-# here keeps all the colours mutually consistent on every redraw.
+# The strip is *displayed* by reading that option (#{@...}) — an instant
+# substitution — rather than by a #() job. tmux only re-runs #() jobs on its
+# throttled status-redraw schedule, which left the active/last/activity highlight
+# visibly lagging (or stuck on the wrong tab) when switching windows. Instead the
+# selection/activity hooks run this script (in the background, to avoid blocking
+# the server it then calls back into); it rewrites the option and forces a redraw,
+# so the strip updates within a few ms of the event. Reading every window from one
+# list-windows snapshot also keeps each separator's neighbour colour consistent.
 indexes=()
 names=()
 actives=()
@@ -78,12 +80,16 @@ done < <(
 )
 
 count="${#indexes[@]}"
-[[ "$count" -eq 0 ]] && exit 0
+if [[ "$count" -eq 0 ]]; then
+  tmux set -gq "$STRIP_OPTION" ""
+  exit 0
+fi
 
 # Pre-compute every tab's background colour so neighbour lookups are exact.
 bgs=()
 for ((i = 0; i < count; i++)); do
-  bgs+=("$(tab_bg "${actives[i]}" "${activities[i]}" "${bells[i]}" "${lasts[i]}")")
+  tab_bg "${actives[i]}" "${activities[i]}" "${bells[i]}" "${lasts[i]}"
+  bgs+=("$TAB_BG")
 done
 
 out=""
@@ -94,22 +100,25 @@ for ((i = 0; i < count; i++)); do
   last="${lasts[i]}"
 
   current_bg="${bgs[i]}"
-  current_fg="$(tab_fg "$active" "$activity" "$bell" "$last")"
+  tab_fg "$active" "$activity" "$bell" "$last"
+  current_fg="$TAB_FG"
   if ((i + 1 < count)); then
     next_bg="${bgs[i + 1]}"
   else
     next_bg="${THEME[background]}"
   fi
 
-  window_number="$($CURRENT_DIR/custom-number.sh "${indexes[i]}" "$window_id_style")"
+  custom_number "${indexes[i]}" "$window_id_style" window_number
 
   pane_expr=""
   if [[ "${zooms[i]}" == "1" ]]; then
     if [[ "$zoom_id_style" != "hide" ]]; then
-      pane_expr=" $($CURRENT_DIR/custom-number.sh "${panes[i]}" "$zoom_id_style")"
+      custom_number "${panes[i]}" "$zoom_id_style" pane_num
+      pane_expr=" $pane_num"
     fi
   elif [[ "$pane_id_style" != "hide" ]]; then
-    pane_expr=" $($CURRENT_DIR/custom-number.sh "${panes[i]}" "$pane_id_style")"
+    custom_number "${panes[i]}" "$pane_id_style" pane_num
+    pane_expr=" $pane_num"
   fi
 
   tab_icon=""
@@ -123,7 +132,7 @@ for ((i = 0; i < count; i++)); do
 
   last_marker=""
   if [[ "$last" == "1" && "$active" != "1" ]]; then
-    last_marker=" 󰁯"
+    last_marker=" $LAST_MARKER"
   fi
 
   style_flags="nobold,nodim"
@@ -138,12 +147,16 @@ for ((i = 0; i < count; i++)); do
     leading="#[fg=${THEME[background]},bg=${current_bg}]${SEPARATOR}"
   fi
 
-  out+="#[range=window|${indexes[i]}]"
-  out+="$(printf '%s#[fg=%s,bg=%s,%s] %s%s%s%s#[fg=%s,bg=%s]%s' \
+  printf -v seg '%s#[fg=%s,bg=%s,%s] %s%s%s%s#[fg=%s,bg=%s]%s' \
     "$leading" \
     "$current_fg" "$current_bg" "$style_flags" \
     "$tab_icon" "$window_number" "${names[i]}" "$pane_expr$last_marker " \
-    "$current_bg" "$next_bg" "$SEPARATOR")"
+    "$current_bg" "$next_bg" "$SEPARATOR"
+  out+="#[range=window|${indexes[i]}]$seg"
 done
+out+="#[norange]"
 
-printf '%s#[norange]' "$out"
+tmux set -gq "$STRIP_OPTION" "$out"
+# Repaint now that the strip is up to date. The refresh hooks run this script in
+# the background, so this is what makes the new strip actually appear promptly.
+tmux refresh-client -S 2>/dev/null

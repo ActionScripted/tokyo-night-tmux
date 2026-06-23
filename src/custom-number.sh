@@ -14,26 +14,41 @@ format_roman=" 󱂈󱂉󱂊󱂋󱂌󱂍󱂎󱂏󱂐"
 format_super="⁰¹²³⁴⁵⁶⁷⁸⁹"
 format_sub="₀₁₂₃₄₅₆₇₈₉"
 
-ID=$1
-FORMAT=${2:-none}
+# Defined as a function so callers (e.g. window-tab.sh) can source this file and
+# format numbers in-process instead of paying a fork+exec per window.
+# custom_number ID [FORMAT] [OUTVAR]
+# With OUTVAR the result is assigned to that variable (no subshell); otherwise it
+# is printed. Callers in hot paths pass OUTVAR to avoid a fork per number.
+custom_number() {
+  local ID="$1"
+  local FORMAT="${2:-none}"
+  local outvar="$3"
+  local fmtvar="format_${FORMAT}"
+  # Indirect expansion preserves any leading whitespace in the format string.
+  local format="${!fmtvar}"
+  local i DIGIT result=""
 
-# Preserve leading whitespace for bash
-format="$(eval echo \"\$format_${FORMAT}\")"
+  if [ "$FORMAT" != "hide" ]; then
+    [ -z "$format" ] && format="$format_none"
+    # If format is roman numerals (-r), only handle IDs of 1 digit
+    if [ "$FORMAT" = "roman" ] && [ "${#ID}" -gt 1 ]; then
+      result="$ID "
+    else
+      for ((i = 0; i < ${#ID}; i++)); do
+        DIGIT=${ID:i:1}
+        result+="${format:DIGIT:1} "
+      done
+    fi
+  fi
 
-if [ "$FORMAT" = "hide" ]; then
-  exit 0
-fi
+  if [ -n "$outvar" ]; then
+    printf -v "$outvar" '%s' "$result"
+  else
+    printf '%s' "$result"
+  fi
+}
 
-if [ -z "$format" ]; then
-  format="$format_none"
-fi
-
-# If format is roman numerals (-r), only handle IDs of 1 digit
-if [ "$FORMAT" = "roman" ] && [ ${#ID} -gt 1 ]; then
-  echo -n "$ID "
-else
-  for ((i = 0; i < ${#ID}; i++)); do
-    DIGIT=${ID:i:1}
-    echo -n "${format:DIGIT:1} "
-  done
+# Keep the original CLI behaviour when executed directly.
+if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
+  custom_number "$1" "${2:-none}"
 fi
