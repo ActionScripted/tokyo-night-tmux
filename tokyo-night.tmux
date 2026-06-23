@@ -17,7 +17,7 @@ tmux set -g status-right-length 150
 
 RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounderscore,nodim]"
 
-tmux set -g mode-style "fg=${THEME[foreground]},bg=${THEME[black]}"
+tmux set -g mode-style "fg=${THEME[bblack]},bg=${THEME[bblue]}"
 tmux set -g prompt-cursor-colour "${THEME[bblack]}"
 tmux set -g menu-style "fg=${THEME[foreground]},bg=${THEME[background]}"
 tmux set -g menu-selected-style "fg=${THEME[background]},bg=${THEME[blue]}"
