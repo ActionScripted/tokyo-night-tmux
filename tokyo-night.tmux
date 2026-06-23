@@ -114,7 +114,7 @@ fi
 custom_pane="#($SCRIPTS_PATH/custom-number.sh #P $pane_id_style)"
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
 zoom_number="#($SCRIPTS_PATH/custom-number.sh #P $zoom_id_style)"
-window_tab="#($SCRIPTS_PATH/window-tab.sh #I \"$terminal_icon\" \"$active_terminal_icon\" \"$window_id_style\" \"$pane_id_style\" \"$zoom_id_style\")"
+window_tab="#($SCRIPTS_PATH/window-tab.sh \"$terminal_icon\" \"$active_terminal_icon\" \"$window_id_style\" \"$pane_id_style\" \"$zoom_id_style\")"
 
 if [[ "$pane_id_style" == "hide" ]]; then
     custom_pane_expr=""
@@ -164,10 +164,14 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname #[fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]},nobold]$SEPARATOR"
 
 #+--- Windows ---+
+# The whole tab strip is rendered by a single window-tab.sh call so neighbouring
+# separator colours always come from one consistent snapshot. tmux loops these
+# formats once per window, so we only emit the strip from the first window's slot
+# (window_start_flag) and emit nothing for the rest.
 # Focus
-tmux set -g window-status-current-format "$window_tab"
+tmux set -g window-status-current-format "#{?window_start_flag,$window_tab,}"
 # Unfocused
-tmux set -g window-status-format "$window_tab"
+tmux set -g window-status-format "#{?window_start_flag,$window_tab,}"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
