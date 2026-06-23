@@ -7,6 +7,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $CURRENT_DIR/themes.sh
 
+SEGMENT_BG="${THEME[bblack]}"
+
 # Assign values based on user config
 date_format=$(tmux show-option -gv @tokyo-night-tmux_date_format 2>/dev/null)
 time_format=$(tmux show-option -gv @tokyo-night-tmux_time_format 2>/dev/null)
@@ -50,4 +52,4 @@ fi
 date_string="$(date +"$date_string")"
 time_string="$(date +"$time_string")"
 
-echo "$RESET#[fg=${THEME[bblack]}]#[fg=${THEME[foreground]},bg=${THEME[bblack]}] $date_string $separator$time_string "
+echo "#[fg=${THEME[yellow]},bg=${SEGMENT_BG}]#[fg=${THEME[foreground]},bg=${SEGMENT_BG}] $date_string $separator$time_string #[fg=${SEGMENT_BG},bg=${THEME[background]}]"

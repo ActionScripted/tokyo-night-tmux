@@ -5,6 +5,7 @@ source "$CURRENT_DIR/../lib/coreutils-compat.sh"
 source "$CURRENT_DIR/themes.sh"
 
 cd "$1" 2>/dev/null || exit 0
+SEGMENT_BG="${THEME[yellow]}"
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 PROVIDER=$(git config remote.origin.url | sed 's|https://||' | sed 's|git@||' | awk -F'[:/]' '{print $1}')
 
@@ -28,7 +29,7 @@ if [[ $PROVIDER == "github.com" ]]; then
   if ! command -v gh &>/dev/null; then
     exit 0
   fi
-  PROVIDER_ICON="$RESET#[fg=${THEME[foreground]}] "
+  PROVIDER_ICON="#[fg=${THEME[black]},bg=${SEGMENT_BG}] "
   PR_COUNT=$(gh pr list --json number --jq 'length' | bc)
   REVIEW_COUNT=$(gh pr status --json reviewRequests --jq '.needsReview | length' | bc)
   RES=$(gh issue list --json "assignees,labels" --assignee @me)
@@ -39,7 +40,7 @@ elif [[ $PROVIDER == "gitlab.com" ]]; then
   if ! command -v glab &>/dev/null; then
     exit 0
   fi
-  PROVIDER_ICON="$RESET#[fg=#fc6d26] "
+  PROVIDER_ICON="#[fg=${THEME[black]},bg=${SEGMENT_BG}] "
   PR_COUNT=$(glab mr list | grep -cE "^\!")
   REVIEW_COUNT=$(glab mr list --reviewer=@me | grep -cE "^\!")
   ISSUE_COUNT=$(glab issue list | grep -cE "^\#")
@@ -48,22 +49,22 @@ else
 fi
 
 if [[ $PR_COUNT -gt 0 ]]; then
-  PR_STATUS="#[fg=${THEME[ghgreen]},bg=${THEME[background]},bold] ${RESET}${PR_COUNT} "
+  PR_STATUS="#[fg=${THEME[black]},bg=${SEGMENT_BG},bold] ${PR_COUNT} "
 fi
 
 if [[ $REVIEW_COUNT -gt 0 ]]; then
-  REVIEW_STATUS="#[fg=${THEME[ghyellow]},bg=${THEME[background]},bold] ${RESET}${REVIEW_COUNT} "
+  REVIEW_STATUS="#[fg=${THEME[black]},bg=${SEGMENT_BG},bold] ${REVIEW_COUNT} "
 fi
 
 if [[ $ISSUE_COUNT -gt 0 ]]; then
-  ISSUE_STATUS="#[fg=${THEME[ghgreen]},bg=${THEME[background]},bold] ${RESET}${ISSUE_COUNT} "
+  ISSUE_STATUS="#[fg=${THEME[black]},bg=${SEGMENT_BG},bold] ${ISSUE_COUNT} "
 fi
 
 if [[ $BUG_COUNT -gt 0 ]]; then
-  BUG_STATUS="#[fg=${THEME[ghred]},bg=${THEME[background]},bold] ${RESET}${BUG_COUNT} "
+  BUG_STATUS="#[fg=${THEME[black]},bg=${SEGMENT_BG},bold] ${BUG_COUNT} "
 fi
 
-WB_STATUS="#[fg=${THEME[black]},bg=${THEME[background]},bold]  $RESET$PROVIDER_ICON $RESET$PR_STATUS$REVIEW_STATUS$ISSUE_STATUS$BUG_STATUS"
+WB_STATUS="#[fg=${THEME[green]},bg=${SEGMENT_BG}]#[fg=${THEME[black]},bg=${SEGMENT_BG},bold]  ${PROVIDER_ICON}${PR_STATUS}${REVIEW_STATUS}${ISSUE_STATUS}${BUG_STATUS}"
 
 echo "$WB_STATUS"
 

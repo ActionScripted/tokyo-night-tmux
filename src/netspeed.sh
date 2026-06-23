@@ -9,6 +9,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 source "$ROOT_DIR/src/themes.sh"
 source "$ROOT_DIR/lib/netspeed.sh"
 
+SEGMENT_BG="${THEME[cyan]}"
+
 # Get network interface
 INTERFACE=$(tmux show-option -gv @tokyo-night-tmux_netspeed_iface 2>/dev/null)
 # Show IP address
@@ -43,8 +45,8 @@ read -r RX2 TX2 < <(get_bytes "$INTERFACE")
 RX_DIFF=$((RX2 - RX1))
 TX_DIFF=$((TX2 - TX1))
 
-RX_SPEED="#[fg=${THEME[foreground]}]$(readable_format "$RX_DIFF" "$TIME_DIFF")"
-TX_SPEED="#[fg=${THEME[foreground]}]$(readable_format "$TX_DIFF" "$TIME_DIFF")"
+RX_SPEED="#[fg=${THEME[bblack]},bg=${SEGMENT_BG}]$(readable_format "$RX_DIFF" "$TIME_DIFF")"
+TX_SPEED="#[fg=${THEME[bblack]},bg=${SEGMENT_BG}]$(readable_format "$TX_DIFF" "$TIME_DIFF")"
 
 # Interface icon
 if [[ ${INTERFACE} == "en0" ]] || [[ -d /sys/class/net/${INTERFACE}/wireless ]]; then
@@ -62,9 +64,9 @@ fi
 
 NETWORK_ICON=${NET_ICONS[${IFACE_TYPE}_${IFACE_STATUS}]}
 
-OUTPUT="${RESET} ${NET_ICONS[traffic_rx]} $RX_SPEED ${NET_ICONS[traffic_tx]} $TX_SPEED $NETWORK_ICON #[dim]$INTERFACE "
+OUTPUT="#[fg=${THEME[magenta]},bg=${SEGMENT_BG}] ${NET_ICONS[traffic_rx]} $RX_SPEED ${NET_ICONS[traffic_tx]} $TX_SPEED #[fg=${THEME[bblack]},bg=${SEGMENT_BG}]$NETWORK_ICON #[dim]$INTERFACE "
 if [[ ${SHOW_IP} -ne 0 ]] && [[ -n $IPV4_ADDR ]]; then
-  OUTPUT+="${NET_ICONS[ip]} #[dim]$IPV4_ADDR "
+  OUTPUT+="${NET_ICONS[ip]} #[fg=${THEME[bblack]},bg=${SEGMENT_BG},dim]$IPV4_ADDR "
 fi
 
 echo -e "$OUTPUT"

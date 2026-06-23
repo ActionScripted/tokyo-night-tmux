@@ -7,10 +7,11 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source $CURRENT_DIR/themes.sh
 
-ACCENT_COLOR="${THEME[blue]}"
+ACCENT_COLOR="${THEME[magenta]}"
+PREV_BG="${THEME[blue]}"
 SECONDARY_COLOR="${THEME[background]}"
-BG_COLOR="${THEME[background]}"
-BG_BAR="${THEME[background]}"
+BG_COLOR="${THEME[black]}"
+BG_BAR="${THEME[magenta]}"
 TIME_COLOR="${THEME[black]}"
 
 if [[ $1 =~ ^[[:digit:]]+$ ]]; then
@@ -99,15 +100,15 @@ else
 fi
 if [ -n "$TITLE" ]; then
   if [ "$STATUS" = "playing" ]; then
-    PLAY_STATE=" $OUTPUT"
+    PLAY_ICON=""
   else
-    PLAY_STATE=" 󰏤$OUTPUT"
+    PLAY_ICON="󰏤"
   fi
-  OUTPUT="$PLAY_STATE $TITLE"
+  OUTPUT="${PLAY_ICON} $TITLE"
 
   # Only show the song title if we are over $MAX_TITLE_WIDTH characters
   if [ "${#OUTPUT}" -ge $MAX_TITLE_WIDTH ]; then
-    OUTPUT="$PLAY_STATE ${TITLE:0:$MAX_TITLE_WIDTH-1}…"
+    OUTPUT="${PLAY_ICON} ${TITLE:0:$MAX_TITLE_WIDTH-1}…"
   fi
 else
   OUTPUT=''
@@ -115,7 +116,7 @@ fi
 
 MAX_TITLE_WIDTH=25
 if [ "${#OUTPUT}" -ge $MAX_TITLE_WIDTH ]; then
-  OUTPUT="$PLAY_STATE ${TITLE:0:$MAX_TITLE_WIDTH-1}"
+  OUTPUT="${PLAY_ICON} ${TITLE:0:$MAX_TITLE_WIDTH-1}"
   # Remove trailing spaces
   OUTPUT="${OUTPUT%"${OUTPUT##*[![:space:]]}"}…"
 fi
@@ -123,18 +124,18 @@ fi
 if [ -z "$OUTPUT" ]; then
   echo "$OUTPUT #[fg=green,bg=default]"
 else
-  OUT="$OUTPUT $TIME "
+  OUT=" $OUTPUT $TIME "
   ONLY_OUT="$OUTPUT "
-  TIME_INDEX=${#ONLY_OUT}
+  TIME_INDEX=$((${#ONLY_OUT} + 2))
   OUTPUT_LENGTH=${#OUT}
   PERCENT=$((POSITION * 100 / DURATION))
   PROGRESS=$((OUTPUT_LENGTH * PERCENT / 100))
-  O="$OUTPUT"
+  O=" $OUTPUT"
 
   if [ $PROGRESS -le $TIME_INDEX ]; then
-    echo "#[nobold,fg=$BG_COLOR,bg=$ACCENT_COLOR]${O:0:PROGRESS}#[fg=$ACCENT_COLOR,bg=$BG_BAR]${O:PROGRESS:TIME_INDEX} #[fg=$TIME_COLOR,bg=$BG_BAR]$TIME "
+    echo "#[fg=$PREV_BG,bg=$ACCENT_COLOR]${O:0:1}#[nobold,fg=$BG_COLOR,bg=$ACCENT_COLOR]${O:1:PROGRESS-1}#[fg=${THEME[black]},bg=$BG_BAR]${O:PROGRESS:TIME_INDEX} #[fg=$TIME_COLOR,bg=$BG_BAR]$TIME "
   else
     DIFF=$((PROGRESS - TIME_INDEX))
-    echo "#[nobold,fg=$BG_COLOR,bg=$ACCENT_COLOR]${O:0:TIME_INDEX} #[fg=$BG_BAR,bg=$ACCENT_COLOR]${OUT:TIME_INDEX:DIFF}#[fg=$TIME_COLOR,bg=$BG_BAR]${OUT:PROGRESS}"
+    echo "#[fg=$PREV_BG,bg=$ACCENT_COLOR]${O:0:1}#[nobold,fg=$BG_COLOR,bg=$ACCENT_COLOR]${O:1:TIME_INDEX-1}#[fg=${THEME[black]},bg=$ACCENT_COLOR]${OUT:TIME_INDEX:DIFF}#[fg=$TIME_COLOR,bg=$BG_BAR]${OUT:PROGRESS}"
   fi
 fi

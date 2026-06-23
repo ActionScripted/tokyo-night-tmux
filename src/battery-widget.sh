@@ -3,11 +3,13 @@
 # Imports
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 . "${ROOT_DIR}/lib/coreutils-compat.sh"
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$CURRENT_DIR/themes.sh"
 
 # Get values from tmux config or set defaults
 BATTERY_NAME=$(tmux show-option -gv @tokyo-night-tmux_battery_name 2>/dev/null)
 BATTERY_LOW=$(tmux show-option -gv @tokyo-night-tmux_battery_low_threshold 2>/dev/null)
-RESET="#[fg=brightwhite,bg=#15161e,nobold,noitalics,nounderscore,nodim]"
+SEGMENT_BG="${THEME[yellow]}"
 
 DISCHARGING_ICONS=("󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹")
 CHARGING_ICONS=("󰢜" "󰂆" "󰂇" "󰂈" "󰢝" "󰂉" "󰢞" "󰂊" "󰂋" "󰂅")
@@ -107,12 +109,12 @@ esac
 
 # Set color based on battery percentage
 if [[ $BATTERY_PERCENTAGE -lt $BATTERY_LOW ]]; then
-  color="#[fg=red,bg=default,bold]"
+  icon_color="${THEME[red]}"
 elif [[ $BATTERY_PERCENTAGE -ge 100 ]]; then
-  color="#[fg=green,bg=default]"
+  icon_color="${THEME[green]}"
 else
-  color="#[fg=yellow,bg=default]"
+  icon_color="${THEME[black]}"
 fi
 
 # Print the battery status with some extra spaces for padding
-echo "${color} ${ICON}${RESET} #[bg=default] ${BATTERY_PERCENTAGE}% "
+echo "#[fg=${THEME[background]},bg=${SEGMENT_BG}]#[fg=${icon_color},bg=${SEGMENT_BG}] ${ICON} #[fg=${THEME[black]},bg=${SEGMENT_BG}]${BATTERY_PERCENTAGE}% "
