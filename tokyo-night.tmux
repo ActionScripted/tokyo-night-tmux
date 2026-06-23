@@ -114,7 +114,13 @@ fi
 custom_pane="#($SCRIPTS_PATH/custom-number.sh #P $pane_id_style)"
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
 zoom_number="#($SCRIPTS_PATH/custom-number.sh #P $zoom_id_style)"
-window_tab="#($SCRIPTS_PATH/window-tab.sh \"$terminal_icon\" \"$active_terminal_icon\" \"$window_id_style\" \"$pane_id_style\" \"$zoom_id_style\")"
+
+# window-tab.sh renders the entire tab strip into @tokyo-night-tmux_window_strip,
+# reading its config from this packed option. The status line just displays that
+# option, so switching windows updates the highlight instantly (see the refresh
+# hooks below) instead of waiting on a throttled #() job.
+tmux set -gq @tokyo-night-tmux_tab_opts "$terminal_icon|$active_terminal_icon|$window_id_style|$pane_id_style|$zoom_id_style"
+"$SCRIPTS_PATH/window-tab.sh"
 
 if [[ "$pane_id_style" == "hide" ]]; then
     custom_pane_expr=""
@@ -164,14 +170,15 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname #[fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]},nobold]$SEPARATOR"
 
 #+--- Windows ---+
-# The whole tab strip is rendered by a single window-tab.sh call so neighbouring
-# separator colours always come from one consistent snapshot. tmux loops these
-# formats once per window, so we only emit the strip from the first window's slot
-# (window_start_flag) and emit nothing for the rest.
+# The whole tab strip lives in @tokyo-night-tmux_window_strip. tmux loops these
+# formats once per window, so we display the strip from the first window's slot
+# (window_start_flag) and emit nothing for the rest. Reading the option is an
+# instant substitution, so highlights never lag behind the live window state.
+strip_display="#{?window_start_flag,#{@tokyo-night-tmux_window_strip},}"
 # Focus
-tmux set -g window-status-current-format "#{?window_start_flag,$window_tab,}"
+tmux set -g window-status-current-format "$strip_display"
 # Unfocused
-tmux set -g window-status-format "#{?window_start_flag,$window_tab,}"
+tmux set -g window-status-format "$strip_display"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
@@ -192,3 +199,27 @@ else
     tmux set -g status-format[0] "#{E:@tokyo-night-tmux_status_primary_format}"
     tmux set -g status-format[1] ""
 fi
+
+#+--- Refresh hooks ---+
+# Recompute the strip option synchronously on every event that changes a tab's
+# colour/contents, so it's already up to date by the time tmux repaints. Without
+# this the active/last/activity highlight would lag — or stick on the wrong tab —
+# until tmux's next throttled redraw. A dedicated high hook index keeps these from
+# clobbering the user's own hooks or piling up across reloads.
+# Runs in the background (-b): a synchronous run-shell would deadlock, since the
+# script calls back into tmux (list-windows/set) while the server is blocked
+# waiting on it. window-tab.sh issues its own refresh-client once it has written
+# the option, so the strip repaints as soon as it's ready (a few ms later).
+_tnt_refresh="run-shell -b \"$SCRIPTS_PATH/window-tab.sh\""
+for _hook in \
+    after-select-window \
+    after-new-window \
+    window-linked \
+    window-unlinked \
+    window-renamed \
+    pane-focus-in \
+    alert-activity \
+    alert-bell \
+    alert-silence; do
+    tmux set-hook -g "${_hook}[99]" "$_tnt_refresh"
+done
