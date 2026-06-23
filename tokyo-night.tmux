@@ -154,7 +154,14 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 
 #+--- Bars LEFT ---+
 # Session name
-tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]},bg=${prefix_bg},bold] #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname #[fg=${prefix_bg},bg=${THEME[background]},nobold]$SEPARATOR,#[fg=${THEME[bblack]},bg=${THEME[blue]},bold] #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname #[fg=${THEME[blue]},bg=${THEME[background]},nobold]$SEPARATOR}"
+#
+# IMPORTANT: keep every `#{?...}` conditional comma-free (it may only resolve to
+# a plain color or glyph, never a `#[...]` block). tmux's conditional parser
+# miscounts the commas inside a nested `#[fg=...,bg=...]` and leaks the raw style
+# text (e.g. a literal "bg=#222436") onto the status line, which also corrupts
+# the colors of everything drawn after it. So the `#[...]` blocks live OUTSIDE
+# the conditionals and the conditionals only choose the prefix color/glyph.
+tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname #[fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]},nobold]$SEPARATOR"
 
 #+--- Windows ---+
 # Focus
