@@ -63,7 +63,7 @@ if [[ $BUG_COUNT -gt 0 ]]; then
   BUG_STATUS="#[fg=${THEME[ghred]},bg=${THEME[background]},bold] ${RESET}${BUG_COUNT} "
 fi
 
-WB_STATUS="#[fg=${THEME[black]},bg=${THEME[background]},bold] $RESET$PROVIDER_ICON $RESET$PR_STATUS$REVIEW_STATUS$ISSUE_STATUS$BUG_STATUS"
+WB_STATUS="#[fg=${THEME[black]},bg=${THEME[background]},bold]  $RESET$PROVIDER_ICON $RESET$PR_STATUS$REVIEW_STATUS$ISSUE_STATUS$BUG_STATUS"
 
 echo "$WB_STATUS"
 

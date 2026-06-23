@@ -15,6 +15,7 @@ tmux set -g status-left-length 80
 tmux set -g status-right-length 150
 
 RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounderscore,nodim]"
+SEPARATOR=""
 
 tmux set -g mode-style "fg=${THEME[bblack]},bg=${THEME[bblue]}"
 tmux set -g prompt-cursor-colour "${THEME[bblack]}"
@@ -155,13 +156,13 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 
 #+--- Bars LEFT ---+
 # Session name
-tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]}]#[bg=${prefix_bg}]#[bold],#[fg=${THEME[bblack]}]#[bg=${THEME[blue]}]#[bold]} #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname "
+tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]}]#[bg=${prefix_bg}]#[bold],#[fg=${THEME[bblack]}]#[bg=${THEME[blue]}]#[bold]} #{?client_prefix,󰠠 ,#[dim]󰤂 }#[bold,nodim]#S$hostname #[fg=${THEME[bblack]},nobold]$SEPARATOR"
 
 #+--- Windows ---+
 # Focus
-tmux set -g window-status-current-format "$RESET#[fg=${THEME[bblack]},bg=${THEME[magenta]}] $active_terminal_icon_status#[fg=${THEME[black]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }"
+tmux set -g window-status-current-format "$RESET#[fg=${THEME[bblack]},bg=${THEME[magenta]}] $active_terminal_icon_status#[fg=${THEME[black]},bold,nodim]$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }#[fg=${THEME[magenta]}]$SEPARATOR"
 # Unfocused
-tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}] 󰁯 , }"
+tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_icon_status${RESET}$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}] 󰁯 , }#[fg=${THEME[bblack]},nodim]$SEPARATOR"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
