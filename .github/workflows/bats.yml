@@ -3,7 +3,7 @@ name: bats
 on:
   pull_request:
   push:
-    branches: [master, next]
+    branches: [main, next]
   workflow_dispatch:
 
 jobs:

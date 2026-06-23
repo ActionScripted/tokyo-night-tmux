@@ -19,7 +19,7 @@ set -g @tokyo-night-tmux_zoom_id_style dsquare     # pane number shown when zoom
 | Style | Characters | Notes |
 |---|---|---|
 | `none` | `0 1 2 3 …` | Default system font |
-| `digital` | `🯰 🯱 🯲 🯳 …` | 7-segment display — requires [Unicode support](https://github.com/janoamaral/tokyo-night-tmux/issues/36#issuecomment-1907072080) |
+| `digital` | `🯰 🯱 🯲 🯳 …` | 7-segment display - requires Unicode support |
 | `roman` | `󱂈 󱂉 󱂊 …` | Roman numerals — requires Nerd Fonts |
 | `fsquare` | `󰎡 󰎤 󰎧 …` | Filled square — requires Nerd Fonts |
 | `hsquare` | `󰎣 󰎦 󰎩 …` | Hollow square — requires Nerd Fonts |

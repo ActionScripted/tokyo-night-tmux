@@ -23,7 +23,7 @@ If applicable, add screenshots to help explain your problem.
 - OS: [e.g. Ubuntu 20.04]: 
 - terminal [e.g. kitty, alacritty]: 
 - tmux version [e.g. 3.3a]: 
-- tokyo-night-tmux branch [e.g. master, next, legacy]: 
+- tokyo-night-tmux branch [e.g. main, next, legacy]: 
 
 **Additional context**
 Add any other context about the problem here.

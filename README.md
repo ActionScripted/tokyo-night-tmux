@@ -1,17 +1,16 @@
 # Tokyo Night Tmux
 
-![CI](https://github.com/janoamaral/tokyo-night-tmux/actions/workflows/pre-commit.yml/badge.svg?branch=master)
+![CI](https://github.com/ActionScripted/tokyo-night-tmux/actions/workflows/pre-commit.yml/badge.svg?branch=main)
 
 A clean, dark Tmux theme inspired by the lights of [Tokyo at night](https://www.google.com/search?q=tokyo+night&tbm=isch).
-Adapted from the [Tokyo Night VS Code theme](https://github.com/enkia/tokyo-night-vscode-theme) — the perfect companion for [tokyonight-vim](https://github.com/ghifarit53/tokyonight-vim).
-
-<a href="https://www.buymeacoffee.com/jano" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 174px !important;" ></a>
+Based on the original [janoamaral/tokyo-night-tmux](https://github.com/janoamaral/tokyo-night-tmux) project, with customizations and ongoing maintenance in this fork.
+Adapted from the [Tokyo Night VS Code theme](https://github.com/enkia/tokyo-night-vscode-theme) - the perfect companion for [tokyonight-vim](https://github.com/ghifarit53/tokyonight-vim).
 
 ---
 
 ## Preview
 
-https://github.com/janoamaral/tokyo-night-tmux/assets/10008708/59ecd814-bc2b-47f2-82b1-ffdbfbc54fbf
+https://github.com/ActionScripted/tokyo-night-tmux
 
 > Terminal: [Kitty](https://github.com/davidmathers/tokyo-night-kitty-theme) · Font: [SFMono Nerd Font Ligaturized](https://github.com/shaunsingh/SFMono-Nerd-Font-Ligaturized)
 
@@ -69,7 +68,7 @@ apk add bash bc coreutils gawk git jq playerctl sed
 Add to `~/.tmux.conf` and press `prefix` + <kbd>I</kbd> to install:
 
 ```bash
-set -g @plugin "janoamaral/tokyo-night-tmux"
+set -g @plugin "ActionScripted/tokyo-night-tmux"
 ```
 
 ### 3. Pick a theme *(optional)*
