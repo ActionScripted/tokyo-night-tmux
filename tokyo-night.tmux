@@ -33,6 +33,9 @@ tmux set -g pane-border-status off
 tmux set -g status-style bg="${THEME[background]}"
 tmux set -g popup-border-style "fg=${THEME[blue]}"
 
+status_divider_color="${THEME[bblack]}"
+status_divider_format="#[fg=${status_divider_color}]#(width=#{client_width}; printf '%*s' \"\$width\" '' | tr ' ' '─')"
+
 TMUX_VARS="$(tmux show -g 2>/dev/null || true)"
 
 tmux_get_var() {
@@ -161,3 +164,13 @@ tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]}] $terminal_ico
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
 tmux set -g window-status-separator ""
+
+status_primary_format="$(tmux_get_var '@tokyo-night-tmux_status_primary_format')"
+if [[ -z "$status_primary_format" ]]; then
+    status_primary_format="$(tmux show -gv status-format[0] 2>/dev/null)"
+    tmux set -gq @tokyo-night-tmux_status_primary_format "$status_primary_format"
+fi
+
+tmux set -g status 2
+tmux set -g status-format[0] "#{?#{==:#{status-position},top},#{E:@tokyo-night-tmux_status_primary_format},$status_divider_format}"
+tmux set -g status-format[1] "#{?#{==:#{status-position},top},$status_divider_format,#{E:@tokyo-night-tmux_status_primary_format}}"
