@@ -34,7 +34,7 @@ tmux set -g status-style bg="${THEME[background]}"
 tmux set -g popup-border-style "fg=${THEME[blue]}"
 
 status_divider_color="${THEME[bblack]}"
-status_divider_format="#[fg=${status_divider_color}]#(width=#{client_width}; printf '%%*s' \"\$width\" '' | tr ' ' '─')"
+status_divider_format="#[fg=${status_divider_color}]#(printf '%%*s' 2000 '' | tr ' ' '─')"
 
 TMUX_VARS="$(tmux show -g 2>/dev/null || true)"
 
