@@ -37,11 +37,8 @@ tmux set -g popup-border-style "fg=${THEME[blue]}"
 status_divider_color="${THEME[bblack]}"
 status_divider_format="#[fg=${status_divider_color}]#{R:─,#{client_width}}"
 
-TMUX_VARS="$(tmux show -g 2>/dev/null || true)"
-
 tmux_get_var() {
-    local key="$1"
-    awk -v key="$key" '$1 == key { print $2; exit }' <<<"$TMUX_VARS"
+    tmux show -gqv "$1" 2>/dev/null
 }
 
 is_enabled() {
@@ -117,6 +114,7 @@ fi
 custom_pane="#($SCRIPTS_PATH/custom-number.sh #P $pane_id_style)"
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
 zoom_number="#($SCRIPTS_PATH/custom-number.sh #P $zoom_id_style)"
+window_tab="#($SCRIPTS_PATH/window-tab.sh #I \"$terminal_icon\" \"$active_terminal_icon\" \"$window_id_style\" \"$pane_id_style\" \"$zoom_id_style\")"
 
 if [[ "$pane_id_style" == "hide" ]]; then
     custom_pane_expr=""
@@ -160,9 +158,9 @@ tmux set -g status-left "#{?client_prefix,#[fg=${THEME[bblack]},bg=${prefix_bg},
 
 #+--- Windows ---+
 # Focus
-tmux set -g window-status-current-format "$RESET#[fg=${THEME[black]},bg=${THEME[magenta]},bold,nodim] $active_terminal_icon_status$window_number#W#[nobold]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, , }#[fg=${THEME[magenta]},bg=${THEME[background]}]$SEPARATOR"
+tmux set -g window-status-current-format "$window_tab"
 # Unfocused
-tmux set -g window-status-format "$RESET#[fg=${THEME[foreground]},bg=${THEME[bblack]}] $terminal_icon_status$window_number#W#[nobold,dim]#{?window_zoomed_flag,$zoom_expr,$custom_pane_expr}#{?window_last_flag, #[fg=${THEME[yellow]}] 󰁯 , }#[fg=${THEME[bblack]},bg=${THEME[background]}]$SEPARATOR"
+tmux set -g window-status-format "$window_tab"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
