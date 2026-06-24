@@ -88,19 +88,31 @@ prefix_bg="${THEME[red]}"
 [[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
 
 # Arrow separators (U+E0B0/U+E0B2, Nerd Font required).
-# Active tab owns both its arrows; inactive tabs are plain blocks — so the
-# active tab's arrow colors are always static (bblack = all inactive tabs' bg).
-# The status-left trailing arrow uses #{?client_prefix,...} inside fg= (same
-# pattern as the existing bg=#{?...} in the session block) to select the right
-# segment bg at render time without nesting a #[...] block inside a conditional.
+#
+# Pill approach: every tab independently transitions to/from the status bar
+# background. This avoids the need for any cross-tab color knowledge — in
+# particular, activity-flagged tabs (yellow bg) work correctly because the
+# inactive arrow uses #{?window_activity_flag,...} to pick the right color at
+# tmux render time. The conditional sits inside a #[bg=...] or #[fg=...] value,
+# NOT inside a #{?...} as a full #[...] block — that distinction is what the
+# comment below the status-left format warns about.
+#
+# Active:   bg → magenta → bg
+# Inactive: bg → #{?activity,yellow,bblack} → bg
 open_active=""
 close_active=""
+open_inactive=""
+close_inactive=""
 sl_arrow=""
 right_cap=""
 
 if is_enabled "$show_arrows"; then
-    open_active="$(sep_r "${THEME[bblack]}" "${THEME[magenta]}")"
-    close_active="$(sep_r "${THEME[magenta]}" "${THEME[bblack]}")"
+    open_active="#[fg=${THEME[background]},bg=${THEME[magenta]}]"$'\xee\x82\xb0'
+    close_active="#[fg=${THEME[magenta]},bg=${THEME[background]}]"$'\xee\x82\xb0'
+
+    open_inactive="#[fg=${THEME[background]},bg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}]"$'\xee\x82\xb0'
+    close_inactive="#[fg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
+
     sl_arrow="#[nobold,fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
     # First enabled right-side widget determines the cap color.
@@ -158,14 +170,11 @@ tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},
 #   active  -> magenta (purple)   activity -> yellow   otherwise -> bblack
 win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
 win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
-# When @tokyo-night-tmux_show_arrows=1, the active tab owns both its arrows
-# (open_active/close_active); inactive tabs stay as plain blocks. This matches
-# tmux-powerline's approach: all inactive tabs share bblack, so the active tab
-# can hard-code the transition colors without querying neighbor state.
 # Focus (active window)
 tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
-# Unfocused
-tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+# Unfocused — open_inactive/close_inactive use #{?window_activity_flag,...} so
+# activity-flagged tabs (yellow bg) get correct arrow colors automatically.
+tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.
