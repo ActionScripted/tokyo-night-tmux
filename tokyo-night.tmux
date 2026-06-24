@@ -129,6 +129,11 @@ win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
 tmux set -g window-status-current-format "#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W #[fg=${THEME[magenta]},bg=${THEME[background]},nobold]$SEPARATOR"
 # Unfocused
 tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${win_bg},bg=${THEME[background]}]$SEPARATOR"
+# tmux's activity/bell window styles default to `reverse`, which would flip the
+# explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
+# The format already colours those windows, so neutralise the built-in styles.
+tmux set -g window-status-activity-style "default"
+tmux set -g window-status-bell-style "default"
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "$battery_status$current_path$cmus_status$netspeed$git_status$wb_git_status$date_and_time"
