@@ -50,11 +50,13 @@ set -g monitor-activity on
 
 ## Prefix highlight
 
-When the tmux prefix key is active, the session name badge changes its icon to `󰠠`. By default the background color stays the same. To also change the background color, set a theme color name:
+When the tmux prefix key is active, the session name badge changes its icon to `󰠠` and its background turns red. Change the color with a theme color name:
 
 ```bash
-set -g @tokyo-night-tmux_prefix_color red
+set -g @tokyo-night-tmux_prefix_color blue
 ```
+
+> **Default:** `prefix_color = red`
 
 Available names: `red`, `blue`, `green`, `cyan`, `magenta`, `yellow`, `white`, `black`, `bred`, `bblue`, `bgreen`, `bcyan`, `bmagenta`, `byellow`. A raw hex value (e.g. `#ff0000`) also works.
 

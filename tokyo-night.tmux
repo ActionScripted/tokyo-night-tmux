@@ -77,7 +77,8 @@ show_path="${show_path:-0}"
 show_status_divider="${show_status_divider:-1}"
 show_wbg="${show_wbg:-0}"
 
-prefix_bg="${THEME[blue]}"
+# Prefix-active badge colour defaults to red; override with @..._prefix_color.
+prefix_bg="${THEME[red]}"
 [[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
 
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
