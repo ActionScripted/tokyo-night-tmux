@@ -89,23 +89,23 @@ prefix_bg="${THEME[red]}"
 
 # Arrow separators (U+E0B0/U+E0B2, Nerd Font required).
 #
-# Active tab owns both arrows; inactive tabs are plain blocks. This mirrors
-# tmux-powerline's #[inverse]/#[regular] pattern — translated to our explicit
-# hex colors: the active tab's arrows hard-code bblack (all inactive tabs' bg)
-# so adjacent bblack↔magenta transitions are seamless with no background gap.
-# Inactive tabs need no arrows because same-color blocks blend automatically.
-#
-# Accepted tradeoff: activity-flagged tabs (yellow bg) sit adjacent to the
-# active tab's bblack-colored arrow, which is a 1-cell colour mismatch.
-# tmux-powerline makes the same tradeoff with its #[inverse] approach.
+# Pill approach: every tab owns its own open/close arrows, each transitioning
+# through the status-bar background. Active=magenta, activity=yellow, rest=bblack.
+# The #{?window_activity_flag,...} inside fg=/bg= attribute values is safe —
+# tmux reads #{?...} as the whole value; the commas inside aren't separators.
 open_active=""
 close_active=""
+open_inactive=""
+close_inactive=""
 sl_arrow=""
 right_cap=""
 
 if is_enabled "$show_arrows"; then
-    open_active="#[fg=${THEME[bblack]},bg=${THEME[magenta]}]"$'\xee\x82\xb0'
-    close_active="#[fg=${THEME[magenta]},bg=${THEME[bblack]}]"$'\xee\x82\xb0'
+    open_active="#[fg=${THEME[background]},bg=${THEME[magenta]}]"$'\xee\x82\xb0'
+    close_active="#[fg=${THEME[magenta]},bg=${THEME[background]}]"$'\xee\x82\xb0'
+
+    open_inactive="#[fg=${THEME[background]},bg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}]"$'\xee\x82\xb0'
+    close_inactive="#[fg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
     sl_arrow="#[nobold,fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
@@ -166,8 +166,8 @@ win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
 win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
 # Focus (active window)
 tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
-# Unfocused — plain blocks; the active tab's arrows provide the transitions.
-tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+# Unfocused — pill arrows, color adapts to activity flag at tmux runtime.
+tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.

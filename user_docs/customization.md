@@ -58,7 +58,7 @@ set -g @tokyo-night-tmux_show_arrows 1
 
 > **Default:** `0` (off)
 
-The active window tab owns its own arrows (opening and closing). Inactive tabs remain plain colored blocks — no cross-tab state is needed.
+Every window tab has its own opening and closing arrows that transition through the status-bar background. Activity-flagged tabs (yellow) adapt automatically — no script hooks required.
 
 ---
 
