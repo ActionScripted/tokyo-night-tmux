@@ -32,7 +32,7 @@ set -g @tokyo-night-tmux_window_id_style fsquare
 
 ## Window tab colors
 
-Each tab shows its number and name with a powerline arrow separator. Colors are driven by window state:
+Each tab shows its number and name as a colored block. Colors are driven by window state:
 
 | State | Color |
 |---|---|
