@@ -48,6 +48,20 @@ set -g monitor-activity on
 
 ---
 
+## Powerline arrows
+
+Enable Powerline-style arrow separators between the session badge, window tabs, and right-side widgets. Requires a [Nerd Font](https://www.nerdfonts.com/) or Powerline-patched font.
+
+```bash
+set -g @tokyo-night-tmux_show_arrows 1
+```
+
+> **Default:** `0` (off)
+
+The active window tab owns its own arrows (opening and closing). Inactive tabs remain plain colored blocks — no cross-tab state is needed.
+
+---
+
 ## Prefix highlight
 
 When the tmux prefix key is active, the session name badge changes its icon to `󰠠` and its background turns red. Change the color with a theme color name:
