@@ -14,7 +14,6 @@ source "$SCRIPTS_PATH/themes.sh"
 tmux set -g status-left-length 80
 tmux set -g status-right-length 150
 
-RESET="#[fg=${THEME[foreground]},bg=${THEME[background]},nobold,noitalics,nounderscore,nodim]"
 SEPARATOR=""
 
 tmux set -g mode-style "fg=${THEME[bblack]},bg=${THEME[bblue]}"
@@ -52,15 +51,8 @@ is_enabled() {
     esac
 }
 
-default_window_id_style="digital"
-default_pane_id_style="hsquare"
-default_zoom_id_style="dsquare"
+default_window_id_style="fsquare"
 
-default_terminal_icon=""
-default_active_terminal_icon=""
-
-active_terminal_icon="$(tmux_get_var '@tokyo-night-tmux_active_terminal_icon')"
-pane_id_style="$(tmux_get_var '@tokyo-night-tmux_pane_id_style')"
 prefix_color="$(tmux_get_var '@tokyo-night-tmux_prefix_color')"
 show_battery_widget="$(tmux_get_var '@tokyo-night-tmux_show_battery_widget')"
 show_datetime="$(tmux_get_var '@tokyo-night-tmux_show_datetime')"
@@ -71,15 +63,9 @@ show_netspeed="$(tmux_get_var '@tokyo-night-tmux_show_netspeed')"
 show_path="$(tmux_get_var '@tokyo-night-tmux_show_path')"
 show_status_divider="$(tmux_get_var '@tokyo-night-tmux_status_divider')"
 show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
-terminal_icon="$(tmux_get_var '@tokyo-night-tmux_terminal_icon')"
 window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
-zoom_id_style="$(tmux_get_var '@tokyo-night-tmux_zoom_id_style')"
 
-active_terminal_icon="${active_terminal_icon:-$default_active_terminal_icon}"
-pane_id_style="${pane_id_style:-$default_pane_id_style}"
-terminal_icon="${terminal_icon:-$default_terminal_icon}"
 window_id_style="${window_id_style:-$default_window_id_style}"
-zoom_id_style="${zoom_id_style:-$default_zoom_id_style}"
 
 show_battery_widget="${show_battery_widget:-0}"
 show_datetime="${show_datetime:-0}"
@@ -94,38 +80,7 @@ show_wbg="${show_wbg:-0}"
 prefix_bg="${THEME[blue]}"
 [[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
 
-[[ "$terminal_icon" == "none" ]] && terminal_icon=""
-[[ "$active_terminal_icon" == "none" ]] && active_terminal_icon=""
-
-SSH_ICON="󰣀"
-
-if [[ -n "$terminal_icon" ]]; then
-    terminal_icon_status="#{?#{==:#{pane_current_command},ssh},$SSH_ICON , $terminal_icon }"
-else
-    terminal_icon_status=""
-fi
-
-if [[ -n "$active_terminal_icon" ]]; then
-    active_terminal_icon_status="#{?#{==:#{pane_current_command},ssh},$SSH_ICON , $active_terminal_icon }"
-else
-    active_terminal_icon_status=""
-fi
-
-custom_pane="#($SCRIPTS_PATH/custom-number.sh #P $pane_id_style)"
 window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
-zoom_number="#($SCRIPTS_PATH/custom-number.sh #P $zoom_id_style)"
-
-if [[ "$pane_id_style" == "hide" ]]; then
-    custom_pane_expr=""
-else
-    custom_pane_expr=" $custom_pane"
-fi
-
-if [[ "$zoom_id_style" == "hide" ]]; then
-    zoom_expr=""
-else
-    zoom_expr=" $zoom_number"
-fi
 
 cmus_status=""
 is_enabled "$show_music" && cmus_status="#($SCRIPTS_PATH/music-tmux-statusbar.sh)"

@@ -4,14 +4,12 @@
 
 ---
 
-## Number styles
+## Window number style
 
-Tokyo Night Tmux uses stylized numbers for window IDs, pane IDs, and the zoom indicator. Each can be configured independently.
+Window tabs are numbered with stylized glyphs. Pick the style:
 
 ```bash
-set -g @tokyo-night-tmux_window_id_style digital   # window tab numbers
-set -g @tokyo-night-tmux_pane_id_style hsquare     # pane number shown in status bar
-set -g @tokyo-night-tmux_zoom_id_style dsquare     # pane number shown when zoomed
+set -g @tokyo-night-tmux_window_id_style fsquare
 ```
 
 ### Available styles
@@ -28,41 +26,25 @@ set -g @tokyo-night-tmux_zoom_id_style dsquare     # pane number shown when zoom
 | `sub` | `₀ ₁ ₂ ₃ …` | Subscript symbols |
 | `hide` | *(hidden)* | Number is not shown |
 
-> **Default values:** `window_id_style = digital`, `pane_id_style = hsquare`, `zoom_id_style = dsquare`
+> **Default:** `window_id_style = fsquare`
 
 ---
 
-## Window styles
+## Window tab colors
 
-### Terminal icons
+Each tab shows its number and name with a powerline arrow separator. Colors are driven by window state:
 
-Customize the icon shown on inactive and active window tabs:
+| State | Color |
+|---|---|
+| Active window | Magenta (purple) |
+| Window with activity | Yellow |
+| Other windows | Muted |
 
-```bash
-set -g @tokyo-night-tmux_terminal_icon        # icon for inactive windows (default: )
-set -g @tokyo-night-tmux_active_terminal_icon  # icon for the active window (default: )
-```
-
-Any Nerd Fonts glyph can be used. Copy the glyph character directly into your config. Set to `none` to hide the icon entirely:
-
-```bash
-set -g @tokyo-night-tmux_terminal_icon none
-set -g @tokyo-night-tmux_active_terminal_icon none
-```
-
-### Tidy icons
-
-By default, a space is added between the icon and the window name for readability. Disable it for a more compact look:
+Activity highlighting requires tmux's activity monitoring:
 
 ```bash
-set -g @tokyo-night-tmux_window_tidy_icons 1   # 1 = no extra space | 0 = add space (default)
+set -g monitor-activity on
 ```
-
----
-
-## SSH indicator
-
-Windows running an active `ssh` session automatically show the `󰣀` icon instead of the default terminal icon. This is built-in and requires no configuration.
 
 ---
 
@@ -75,16 +57,6 @@ set -g @tokyo-night-tmux_prefix_color red
 ```
 
 Available names: `red`, `blue`, `green`, `cyan`, `magenta`, `yellow`, `white`, `black`, `bred`, `bblue`, `bgreen`, `bcyan`, `bmagenta`, `byellow`. A raw hex value (e.g. `#ff0000`) also works.
-
----
-
-## Zoom indicator
-
-When a pane is zoomed (`prefix` + `z`), the pane number in the status bar is rendered using the `zoom_id_style` instead of the normal `pane_id_style`. Configure it with:
-
-```bash
-set -g @tokyo-night-tmux_zoom_id_style dsquare
-```
 
 ---
 
