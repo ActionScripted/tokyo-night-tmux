@@ -14,8 +14,6 @@ source "$SCRIPTS_PATH/themes.sh"
 tmux set -g status-left-length 80
 tmux set -g status-right-length 150
 
-SEPARATOR=""
-
 tmux set -g mode-style "fg=${THEME[bblack]},bg=${THEME[bblue]}"
 tmux set -g prompt-cursor-colour "${THEME[bblack]}"
 tmux set -g menu-style "fg=${THEME[foreground]},bg=${THEME[background]}"
@@ -116,20 +114,21 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 # text (e.g. a literal "bg=#222436") onto the status line, which also corrupts
 # the colors of everything drawn after it. So the `#[...]` blocks live OUTSIDE
 # the conditionals and the conditionals only choose the prefix color/glyph.
-tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname #[fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]},nobold]$SEPARATOR"
+tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname #[fg=${THEME[foreground]},bg=${THEME[background]},nobold] "
 
 #+--- Windows ---+
 # Pure native formats: tmux evaluates the colours itself per window, so switching
-# tabs updates instantly. The arrow's colour is the tab's own colour so each tab
-# is a self-contained powerline segment. Conditionals only ever resolve to a plain
-# colour (never a `#[...]` block) to avoid tmux's comma-parsing leak.
+# tabs updates instantly. Conditionals only ever resolve to a plain colour (never
+# a `#[...]` block) to avoid tmux's comma-parsing leak.
 #   active  -> magenta (purple)   activity -> yellow   otherwise -> bblack
 win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
 win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
+# No arrows/separators \u2014 each tab is a plain coloured block followed by a single
+# space on the status background, which keeps adjacent tabs visually apart.
 # Focus (active window)
-tmux set -g window-status-current-format "#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W #[fg=${THEME[magenta]},bg=${THEME[background]},nobold]$SEPARATOR"
+tmux set -g window-status-current-format "#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]}] "
 # Unfocused
-tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${win_bg},bg=${THEME[background]}]$SEPARATOR"
+tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]}] "
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.
