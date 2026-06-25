@@ -87,27 +87,14 @@ show_wbg="${show_wbg:-0}"
 prefix_bg="${THEME[red]}"
 [[ -n "$prefix_color" ]] && prefix_bg="${THEME[$prefix_color]:-$prefix_color}"
 
-# Arrow separators (U+E0B0/U+E0B2, Nerd Font required).
-#
-# Pill approach: every tab owns its own open/close arrows, each transitioning
-# through the status-bar background. Active=magenta, activity=yellow, rest=bblack.
-# The #{?window_activity_flag,...} inside fg=/bg= attribute values is safe —
-# tmux reads #{?...} as the whole value; the commas inside aren't separators.
-open_active=""
-close_active=""
-open_inactive=""
-close_inactive=""
+# sl_arrow: transitions from session badge (blue/prefix_bg) into the tab area.
+# bg=bblack because window-tabs.sh starts prev_color=bblack, producing a
+# seamless join with the first inactive tab (also bblack).
 sl_arrow=""
 right_cap=""
 
 if is_enabled "$show_arrows"; then
-    open_active="#[fg=${THEME[background]},bg=${THEME[magenta]}]"$'\xee\x82\xb0'
-    close_active="#[fg=${THEME[magenta]},bg=${THEME[background]}]"$'\xee\x82\xb0'
-
-    open_inactive="#[fg=${THEME[background]},bg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}]"$'\xee\x82\xb0'
-    close_inactive="#[fg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
-
-    sl_arrow="#[nobold,fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
+    sl_arrow="#[nobold,fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[bblack]}]"$'\xee\x82\xb0'
 
     # First enabled right-side widget determines the cap color.
     _rc_bg=""
@@ -155,24 +142,44 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 # text (e.g. a literal "bg=#222436") onto the status line, which also corrupts
 # the colors of everything drawn after it. So the `#[...]` blocks live OUTSIDE
 # the conditionals and the conditionals only choose the prefix color/glyph.
-tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname ${sl_arrow}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 
 #+--- Windows ---+
-# Pure native formats: tmux evaluates the colours itself per window, so switching
-# tabs updates instantly. Conditionals only ever resolve to a plain colour (never
-# a `#[...]` block) to avoid tmux's comma-parsing leak.
-#   active  -> magenta (purple)   activity -> yellow   otherwise -> bblack
-win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
-win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
-# Focus (active window)
-tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
-# Unfocused — pill arrows, color adapts to activity flag at tmux runtime.
-tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
-# tmux's activity/bell window styles default to `reverse`, which would flip the
-# explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
-# The format already colours those windows, so neutralise the built-in styles.
-tmux set -g window-status-activity-style "default"
-tmux set -g window-status-bell-style "default"
+# When arrows are on: window-tabs.sh generates the full tab string (with correct
+# fg=left_bg,bg=right_bg arrows at every boundary) and stores it in
+# @tokyo-night-tmux_window_tabs. status-left consumes it via #{E:@...}.
+# Hooks re-run the script on every window state change for instant updates.
+# When arrows are off: native tmux per-window formats are used instead.
+if is_enabled "$show_arrows"; then
+    # Generate initial tab string before status-left references it
+    bash "$SCRIPTS_PATH/window-tabs.sh"
+    tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname ${sl_arrow}#{E:@tokyo-night-tmux_window_tabs}"
+    tmux set -g status-left-length 300
+    tmux set -g window-status-current-format ""
+    tmux set -g window-status-format ""
+    # Regenerate tab string on any window state change
+    for _ev in after-select-window window-linked window-unlinked window-renamed alert-activity alert-bell alert-silence; do
+        tmux set-hook -g "${_ev}[97]" "run-shell 'bash ${SCRIPTS_PATH}/window-tabs.sh'"
+    done
+    # Clicking a tab uses the default `MouseDown1Status switch-client -t =`,
+    # which changes the window but does NOT fire after-select-window — so the
+    # cached tab string keeps the magenta active highlight on the old tab.
+    # Bind the click to select-window instead: it resolves the clicked window
+    # the same way (-t =) AND fires after-select-window, so the regen hook above
+    # runs and the active highlight follows the click. (Native window formats
+    # don't need this: tmux re-evaluates them on every redraw.)
+    tmux bind -n MouseDown1Status select-window -t =
+else
+    # Restore tmux's default click binding when arrows are off (native window
+    # formats redraw themselves, so no regeneration is needed).
+    tmux bind -n MouseDown1Status switch-client -t =
+    tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname ${sl_arrow}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+    win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
+    win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
+    tmux set -g window-status-current-format "#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+    tmux set -g window-status-format "#[fg=${win_fg},bg=${win_bg}] $window_number#W #[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+    tmux set -g window-status-activity-style "default"
+    tmux set -g window-status-bell-style "default"
+fi
 
 #+--- Bars RIGHT ---+
 tmux set -g status-right "${right_cap}${battery_status}${current_path}${cmus_status}${netspeed}${git_status}${wb_git_status}${date_and_time}"
