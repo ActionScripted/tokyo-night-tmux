@@ -21,7 +21,7 @@ tmux set -g menu-selected-style "fg=${THEME[background]},bg=${THEME[blue]}"
 tmux set -g menu-border-style "fg=${THEME[blue]}"
 
 tmux set -g message-style "bg=${THEME[bblue]},fg=${THEME[bblack]},bold"
-tmux set -g message-command-style "fg=${THEME[bblue]},bg=${THEME[bblack]},bold"
+tmux set -g message-command-style "fg=${THEME[black]},bg=${THEME[yellow]},bold"
 tmux bind : command-prompt -p " ❯"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
