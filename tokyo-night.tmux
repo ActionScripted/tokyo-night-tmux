@@ -22,6 +22,10 @@ tmux set -g menu-border-style "fg=${THEME[blue]}"
 
 tmux set -g message-style "bg=${THEME[bblue]},fg=${THEME[bblack]},bold"
 tmux set -g message-command-style "fg=${THEME[bblue]},bg=${THEME[bblack]},bold"
+# In tmux 3.5+ the command prompt uses a real cursor instead of emulated, and
+# the message background no longer auto-fills to terminal width. Padding with
+# #{R: ,#{client_width}} forces the style background to span the full line.
+tmux set -g message-format "#[#{?#{command_prompt},#{E:message-command-style},#{E:message-style}}]#{message}#{R: ,#{client_width}}"
 tmux bind : command-prompt -p " ❯"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
@@ -195,17 +199,10 @@ if is_enabled "$show_status_divider"; then
     tmux set -g status 2
     tmux set -g status-format[0] "#{?#{==:#{status-position},top},#{E:@tokyo-night-tmux_status_primary_format},$status_divider_format}"
     tmux set -g status-format[1] "#{?#{==:#{status-position},top},$status_divider_format,#{E:@tokyo-night-tmux_status_primary_format}}"
-    # message-line counts from the bottom (0 = bottom-most line). With status=2
-    # and position=top, the primary/tabs line is on top = index 1 from bottom.
-    # Without this fix, message-line 0 lands on the divider while tabs stay
-    # visible, making the command bar look like it overlaps the tabs.
-    _status_pos="$(tmux show -gqv status-position 2>/dev/null)"
-    [[ "$_status_pos" == "top" ]] && tmux set -g message-line 1 || tmux set -g message-line 0
 else
     tmux set -g status on
     tmux set -g status-format[0] "#{E:@tokyo-night-tmux_status_primary_format}"
     tmux set -g status-format[1] ""
-    tmux set -g message-line 0
 fi
 
 # Clean up machinery from older versions that drove the tabs through a script,
