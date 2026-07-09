@@ -22,10 +22,6 @@ tmux set -g menu-border-style "fg=${THEME[blue]}"
 
 tmux set -g message-style "bg=${THEME[bblue]},fg=${THEME[bblack]},bold"
 tmux set -g message-command-style "fg=${THEME[bblue]},bg=${THEME[bblack]},bold"
-# In tmux 3.5+ the command prompt uses a real cursor instead of emulated, and
-# the message background no longer auto-fills to terminal width. Padding with
-# #{R: ,#{client_width}} forces the style background to span the full line.
-tmux set -g message-format "#[#{?#{command_prompt},#{E:message-command-style},#{E:message-style}}]#{message}#{R: ,#{client_width}}"
 tmux bind : command-prompt -p " ❯"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
