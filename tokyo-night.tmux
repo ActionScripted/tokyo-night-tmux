@@ -195,10 +195,17 @@ if is_enabled "$show_status_divider"; then
     tmux set -g status 2
     tmux set -g status-format[0] "#{?#{==:#{status-position},top},#{E:@tokyo-night-tmux_status_primary_format},$status_divider_format}"
     tmux set -g status-format[1] "#{?#{==:#{status-position},top},$status_divider_format,#{E:@tokyo-night-tmux_status_primary_format}}"
+    # message-line counts from the bottom (0 = bottom-most line). With status=2
+    # and position=top, the primary/tabs line is on top = index 1 from bottom.
+    # Without this fix, message-line 0 lands on the divider while tabs stay
+    # visible, making the command bar look like it overlaps the tabs.
+    _status_pos="$(tmux show -gqv status-position 2>/dev/null)"
+    [[ "$_status_pos" == "top" ]] && tmux set -g message-line 1 || tmux set -g message-line 0
 else
     tmux set -g status on
     tmux set -g status-format[0] "#{E:@tokyo-night-tmux_status_primary_format}"
     tmux set -g status-format[1] ""
+    tmux set -g message-line 0
 fi
 
 # Clean up machinery from older versions that drove the tabs through a script,
