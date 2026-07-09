@@ -171,10 +171,10 @@ tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},
 win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
 win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
 # Focus (active window)
-tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W#{?window_zoomed_flag, 󰍉,} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # Unfocused — open_inactive/close_inactive use #{?window_activity_flag,...} so
 # activity-flagged tabs (yellow bg) get correct arrow colors automatically.
-tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W#{?window_zoomed_flag, 󰍉,} ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.
