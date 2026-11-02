@@ -16,12 +16,15 @@ tmux set -g status-right-length 150
 
 tmux set -g mode-style "fg=${THEME[bblack]},bg=${THEME[bblue]}"
 tmux set -g prompt-cursor-colour "${THEME[bblack]}"
+tmux set -gq prompt-command-cursor-colour "${THEME[blue]}"
 tmux set -g menu-style "fg=${THEME[foreground]},bg=${THEME[background]}"
 tmux set -g menu-selected-style "fg=${THEME[background]},bg=${THEME[blue]}"
 tmux set -g menu-border-style "fg=${THEME[blue]}"
 
-tmux set -g message-style "bg=${THEME[yellow]},fg=${THEME[black]},bold"
-tmux set -g message-command-style "fg=${THEME[black]},bg=${THEME[yellow]},bold"
+# fill= makes the prompt cover the whole status line (3.8 draws it on top of
+# the tabs); us= colours the underline tmux puts under prompt completions.
+tmux set -g message-style "bg=${THEME[yellow]},fg=${THEME[black]},bold,fill=${THEME[yellow]},us=${THEME[black]}"
+tmux set -g message-command-style "fg=${THEME[black]},bg=${THEME[yellow]},bold,fill=${THEME[yellow]},us=${THEME[black]}"
 tmux bind : command-prompt -p " ❯"
 
 tmux set -g pane-border-style "fg=${THEME[bblack]}"
@@ -30,6 +33,40 @@ tmux set -g pane-border-status off
 
 tmux set -g status-style bg="${THEME[background]}"
 tmux set -g popup-border-style "fg=${THEME[blue]}"
+
+# tmux 3.8+ draws its built-in screens (choose-tree, display-panes, copy mode,
+# scrollbars, popups) with named theme colours (themegreen, themedarkgrey, ...)
+# that default to xterm greys/greens. Point them at the palette. The tree's
+# +/- markers are hardcoded to themegreen/themered, so those must stay a
+# green/red. -q keeps older tmux quiet about the unknown options.
+for _mode in dark light; do
+    tmux set -gq "${_mode}-theme-black" "${THEME[black]}"
+    tmux set -gq "${_mode}-theme-blue" "${THEME[blue]}"
+    tmux set -gq "${_mode}-theme-cyan" "${THEME[cyan]}"
+    tmux set -gq "${_mode}-theme-dark-grey" "${THEME[bblack]}"
+    tmux set -gq "${_mode}-theme-green" "${THEME[green]}"
+    tmux set -gq "${_mode}-theme-light-grey" "${THEME[white]}"
+    tmux set -gq "${_mode}-theme-magenta" "${THEME[magenta]}"
+    tmux set -gq "${_mode}-theme-red" "${THEME[red]}"
+    tmux set -gq "${_mode}-theme-white" "${THEME[foreground]}"
+    tmux set -gq "${_mode}-theme-yellow" "${THEME[yellow]}"
+done
+
+# Tree mode / display-panes frames: a recessed band (darker than the
+# background) with a subtle line. Line shape isn't configurable, only colour.
+tmux set -gq tree-mode-border-style "fg=${THEME[bblack]},bg=${THEME[black]}"
+tmux set -gq tree-mode-preview-style "fg=#{?#{||:#{&&:#{pane_format},#{pane_active}},#{&&:#{window_format},#{window_active}}},${THEME[magenta]},${THEME[blue]}}"
+tmux set -gq display-panes-border-style "fg=${THEME[bblack]},bg=${THEME[black]}"
+tmux set -g display-panes-active-colour "${THEME[magenta]}"
+tmux set -g display-panes-colour "${THEME[blue]}"
+# 3.8 fills popups with themedarkgrey; keep them on the normal background.
+tmux set -gq popup-style "fg=${THEME[foreground]},bg=${THEME[background]}"
+tmux set -gq popup-border-lines rounded
+tmux set -gq menu-border-lines rounded
+# Area outside a window smaller than the client: dark, like the tree band.
+tmux set -gq fill-character "#{?is_inside,#[bg=${THEME[black]}] ,#[fg=${THEME[white]}]#[acs]~}"
+# switch-mode (3.8 fuzzy picker) defaults to ANSI cyan; match copy-mode search.
+tmux set -gq switch-mode-match-style "fg=${THEME[black]},bg=${THEME[cyan]}"
 
 status_divider_color="${THEME[bblack]}"
 status_divider_format="#[fg=${status_divider_color}]#{R:─,#{client_width}}"
