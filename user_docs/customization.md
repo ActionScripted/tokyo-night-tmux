@@ -28,6 +28,21 @@ set -g @tokyo-night-tmux_window_id_style fsquare
 
 > **Default:** `window_id_style = fsquare`
 
+### Number separator
+
+Put a separator between the window number and name. The number turns bold and
+the separator is muted:
+
+```bash
+set -g @tokyo-night-tmux_window_id_separator " │ "   # 3 │ name
+set -g @tokyo-night-tmux_window_id_separator ":"     # 3:name
+```
+
+> **Default:** unset (`<number> <name>`)
+
+Pairs best with `window_id_style none`. Glyph styles print a trailing space, so
+the separator lands one space after the icon.
+
 ---
 
 ## Window tab colors
@@ -39,6 +54,12 @@ Each tab shows its number and name as a colored block. Colors are driven by wind
 | Active window | Magenta (purple) |
 | Window with activity | Yellow |
 | Other windows | Muted |
+
+For a quieter cue, keep the tab muted and turn only the window number yellow:
+
+```bash
+set -g @tokyo-night-tmux_activity_style number   # fill (default) | number
+```
 
 Activity highlighting requires tmux's activity monitoring:
 

@@ -106,8 +106,11 @@ show_status_divider="$(tmux_get_var '@tokyo-night-tmux_status_divider')"
 show_arrows="$(tmux_get_var '@tokyo-night-tmux_show_arrows')"
 show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
 window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
+window_id_separator="$(tmux_get_var '@tokyo-night-tmux_window_id_separator')"
+activity_style="$(tmux_get_var '@tokyo-night-tmux_activity_style')"
 
 window_id_style="${window_id_style:-$default_window_id_style}"
+activity_style="${activity_style:-fill}"
 
 show_arrows="${show_arrows:-0}"
 show_battery_widget="${show_battery_widget:-0}"
@@ -135,7 +138,25 @@ prefix_bg="${THEME[red]}"
 # comment below the status-left format warns about.
 #
 # Active:   bg → magenta → bg
-# Inactive: bg → #{?activity,yellow,bblack} → bg
+# Inactive: bg → win_bg → bg
+
+# Unfocused tab colours, by @tokyo-night-tmux_activity_style:
+#   fill   (default) -> activity turns the whole tab yellow
+#   number           -> tab stays bblack; only the window number turns yellow
+# Conditionals only ever resolve to a plain colour (never a `#[...]` block) to
+# avoid tmux's comma-parsing leak.
+if [[ "$activity_style" == "number" ]]; then
+    win_bg="${THEME[bblack]}"
+    win_fg="${THEME[foreground]}"
+    num_fg="#{?window_activity_flag,${THEME[yellow]},${THEME[foreground]}}"
+    sep_fg="${THEME[white]}"
+else
+    win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
+    win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
+    num_fg="$win_fg"
+    sep_fg="$win_fg"
+fi
+
 open_active=""
 close_active=""
 open_inactive=""
@@ -147,8 +168,8 @@ if is_enabled "$show_arrows"; then
     open_active="#[fg=${THEME[background]},bg=${THEME[magenta]}]"$'\xee\x82\xb0'
     close_active="#[fg=${THEME[magenta]},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
-    open_inactive="#[fg=${THEME[background]},bg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}]"$'\xee\x82\xb0'
-    close_inactive="#[fg=#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
+    open_inactive="#[fg=${THEME[background]},bg=${win_bg}]"$'\xee\x82\xb0'
+    close_inactive="#[fg=${win_bg},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
     sl_arrow="#[nobold,fg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bg=${THEME[background]}]"$'\xee\x82\xb0'
 
@@ -163,7 +184,13 @@ if is_enabled "$show_arrows"; then
     [[ -n "$_rc_bg" ]] && right_cap="$(sep_l "${_rc_bg}" "${THEME[background]}")"
 fi
 
-window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
+# With a separator set, plain digits use tmux's own #I (no trailing space, no
+# shell-out) so the separator sits right against the number.
+if [[ -n "$window_id_separator" && "$window_id_style" == "none" ]]; then
+    window_number="#I"
+else
+    window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
+fi
 
 cmus_status=""
 is_enabled "$show_music" && cmus_status="#($SCRIPTS_PATH/music-tmux-statusbar.sh)"
@@ -204,14 +231,20 @@ tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},
 # Pure native formats: tmux evaluates the colours itself per window, so switching
 # tabs updates instantly. Conditionals only ever resolve to a plain colour (never
 # a `#[...]` block) to avoid tmux's comma-parsing leak.
-#   active  -> magenta (purple)   activity -> yellow   otherwise -> bblack
-win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
-win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
+#   active -> magenta (purple)   unfocused -> win_bg/win_fg (see activity_style)
+# @tokyo-night-tmux_window_id_separator (e.g. " │ ") puts a muted separator
+# between a bold number and the name; unset keeps "<number> <name>".
+if [[ -n "$window_id_separator" ]]; then
+    current_label="$window_number#[fg=${THEME[bblack]},nobold]${window_id_separator}#[fg=${THEME[black]},bold]#W"
+    inactive_label="#[bold]$window_number#[fg=${sep_fg},nobold]${window_id_separator}#[fg=${win_fg}]#W"
+else
+    current_label="$window_number#W"
+    inactive_label="$window_number#[fg=${win_fg}]#W"
+fi
 # Focus (active window)
-tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] $window_number#W#{?window_zoomed_flag, 󰍉,} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
-# Unfocused — open_inactive/close_inactive use #{?window_activity_flag,...} so
-# activity-flagged tabs (yellow bg) get correct arrow colors automatically.
-tmux set -g window-status-format "${open_inactive}#[fg=${win_fg},bg=${win_bg}] $window_number#W#{?window_zoomed_flag, 󰍉,} ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] ${current_label}#{?window_zoomed_flag, 󰍉,} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+# Unfocused
+tmux set -g window-status-format "${open_inactive}#[fg=${num_fg},bg=${win_bg}] ${inactive_label}#{?window_zoomed_flag, 󰍉,} ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.
