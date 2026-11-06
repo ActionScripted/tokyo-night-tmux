@@ -106,7 +106,7 @@ show_status_divider="$(tmux_get_var '@tokyo-night-tmux_status_divider')"
 show_arrows="$(tmux_get_var '@tokyo-night-tmux_show_arrows')"
 show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
 window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
-window_id_separator="$(tmux_get_var '@tokyo-night-tmux_window_id_separator')"
+label_separator="$(tmux_get_var '@tokyo-night-tmux_label_separator')"
 activity_style="$(tmux_get_var '@tokyo-night-tmux_activity_style')"
 
 window_id_style="${window_id_style:-$default_window_id_style}"
@@ -186,7 +186,7 @@ fi
 
 # With a separator set, plain digits use tmux's own #I (no trailing space, no
 # shell-out) so the separator sits right against the number.
-if [[ -n "$window_id_separator" && "$window_id_style" == "none" ]]; then
+if [[ -n "$label_separator" && "$window_id_style" == "none" ]]; then
     window_number="#I"
 else
     window_number="#($SCRIPTS_PATH/custom-number.sh #I $window_id_style)"
@@ -225,21 +225,25 @@ is_enabled "$show_hostname" && hostname="#($SCRIPTS_PATH/hostname-widget.sh)"
 # text (e.g. a literal "bg=#222436") onto the status line, which also corrupts
 # the colors of everything drawn after it. So the `#[...]` blocks live OUTSIDE
 # the conditionals and the conditionals only choose the prefix color/glyph.
-tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]} #S$hostname ${sl_arrow}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+# The window id separator, when set, also splits the icon from the session name.
+session_sep=" "
+[[ -n "$label_separator" ]] && session_sep="#[nobold]${label_separator}#[bold]"
+tmux set -g status-left "#[fg=${THEME[bblack]},bg=#{?client_prefix,${prefix_bg},${THEME[blue]}},bold] #{?client_prefix,󰠠,#[dim]󰤂#[nodim]}${session_sep}#S$hostname ${sl_arrow}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 
 #+--- Windows ---+
 # Pure native formats: tmux evaluates the colours itself per window, so switching
 # tabs updates instantly. Conditionals only ever resolve to a plain colour (never
 # a `#[...]` block) to avoid tmux's comma-parsing leak.
 #   active -> magenta (purple)   unfocused -> win_bg/win_fg (see activity_style)
-# @tokyo-night-tmux_window_id_separator (e.g. " │ ") puts a muted separator
+# @tokyo-night-tmux_label_separator (e.g. " │ ") puts a muted separator
 # between a bold number and the name; unset keeps "<number> <name>".
-if [[ -n "$window_id_separator" ]]; then
-    current_label="$window_number#[fg=${THEME[bblack]},nobold]${window_id_separator}#[fg=${THEME[black]},bold]#W"
-    inactive_label="#[bold]$window_number#[fg=${sep_fg},nobold]${window_id_separator}#[fg=${win_fg}]#W"
+if [[ -n "$label_separator" ]]; then
+    current_label="$window_number#[fg=${THEME[bblack]},nobold]${label_separator}#[fg=${THEME[black]},bold]#W"
+    inactive_label="#[bold]$window_number#[fg=${sep_fg},nobold]${label_separator}#[fg=${win_fg}]#W"
 else
     current_label="$window_number#W"
-    inactive_label="$window_number#[fg=${win_fg}]#W"
+    inactive_label="$window_number#W"
+    [[ "$num_fg" != "$win_fg" ]] && inactive_label="$window_number#[fg=${win_fg}]#W"
 fi
 # Focus (active window)
 tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] ${current_label}#{?window_zoomed_flag, 󰍉,} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"

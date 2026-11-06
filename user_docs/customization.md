@@ -28,14 +28,15 @@ set -g @tokyo-night-tmux_window_id_style fsquare
 
 > **Default:** `window_id_style = fsquare`
 
-### Number separator
+### Label separator
 
-Put a separator between the window number and name. The number turns bold and
-the separator is muted:
+Put a separator between each window's number and name, and between the session
+badge's icon and the session name. Window numbers turn bold and the separator
+is muted:
 
 ```bash
-set -g @tokyo-night-tmux_window_id_separator " │ "   # 3 │ name
-set -g @tokyo-night-tmux_window_id_separator ":"     # 3:name
+set -g @tokyo-night-tmux_label_separator " │ "   # 3 │ name
+set -g @tokyo-night-tmux_label_separator ":"     # 3:name
 ```
 
 > **Default:** unset (`<number> <name>`)
