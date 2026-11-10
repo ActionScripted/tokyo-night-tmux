@@ -62,6 +62,18 @@ For a quieter cue, keep the tab muted and turn only the window number yellow:
 set -g @tokyo-night-tmux_activity_style number   # fill (default) | number
 ```
 
+In `number` mode a window with a bell turns its number red instead.
+
+Status icons sit after the window name, space-separated and muted: an optional alert glyph, then the zoom glyph.
+
+```bash
+set -g @tokyo-night-tmux_activity_glyph "*"   # unset (default) = no alert glyph
+set -g @tokyo-night-tmux_bell_glyph "\uf0a2" # defaults to the activity glyph
+set -g @tokyo-night-tmux_zoom_glyph "\uf002" # default 󰍉
+```
+
+A bell takes precedence over activity, so a window shows one alert glyph. Glyphs must not contain `,` or `}`.
+
 Activity highlighting requires tmux's activity monitoring:
 
 ```bash

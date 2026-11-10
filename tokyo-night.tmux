@@ -108,6 +108,9 @@ show_wbg="$(tmux_get_var '@tokyo-night-tmux_show_wbg')"
 window_id_style="$(tmux_get_var '@tokyo-night-tmux_window_id_style')"
 label_separator="$(tmux_get_var '@tokyo-night-tmux_label_separator')"
 activity_style="$(tmux_get_var '@tokyo-night-tmux_activity_style')"
+activity_glyph="$(tmux_get_var '@tokyo-night-tmux_activity_glyph')"
+bell_glyph="$(tmux_get_var '@tokyo-night-tmux_bell_glyph')"
+zoom_glyph="$(tmux_get_var '@tokyo-night-tmux_zoom_glyph')"
 
 window_id_style="${window_id_style:-$default_window_id_style}"
 activity_style="${activity_style:-fill}"
@@ -143,19 +146,36 @@ prefix_bg="${THEME[red]}"
 # Unfocused tab colours, by @tokyo-night-tmux_activity_style:
 #   fill   (default) -> activity turns the whole tab yellow
 #   number           -> tab stays bblack; only the window number turns yellow
+#                       (red for a bell, which takes precedence)
 # Conditionals only ever resolve to a plain colour (never a `#[...]` block) to
 # avoid tmux's comma-parsing leak.
 if [[ "$activity_style" == "number" ]]; then
     win_bg="${THEME[bblack]}"
     win_fg="${THEME[foreground]}"
-    num_fg="#{?window_activity_flag,${THEME[yellow]},${THEME[foreground]}}"
+    num_fg="#{?window_bell_flag,${THEME[red]},#{?window_activity_flag,${THEME[yellow]},${THEME[foreground]}}}"
     sep_fg="${THEME[white]}"
+    icon_fg="${THEME[white]}"
 else
     win_bg="#{?window_activity_flag,${THEME[yellow]},${THEME[bblack]}}"
     win_fg="#{?window_activity_flag,${THEME[black]},${THEME[foreground]}}"
     num_fg="$win_fg"
     sep_fg="$win_fg"
+    icon_fg="$win_fg"
 fi
+
+# Status icons after the window name: an optional alert glyph (bell wins over
+# activity; the bell glyph falls back to the activity glyph) then the zoom
+# glyph, space-separated, not bold, in a muted colour. Set via
+# @tokyo-night-tmux_{activity,bell,zoom}_glyph. Glyphs must not contain `,` or
+# `}` (they sit inside a tmux conditional).
+bell_glyph="${bell_glyph:-$activity_glyph}"
+zoom_glyph="${zoom_glyph:-󰍉}"
+alert_icon=""
+[[ -n "$activity_glyph" ]] &&
+    alert_icon="#{?window_bell_flag, ${bell_glyph},#{?window_activity_flag, ${activity_glyph},}}"
+zoom_icon="#{?window_zoomed_flag, ${zoom_glyph},}"
+inactive_icons="#[fg=${icon_fg},nobold]${alert_icon}${zoom_icon}"
+current_icons="#[fg=${THEME[bblack]},nobold]${zoom_icon}"
 
 open_active=""
 close_active=""
@@ -246,9 +266,9 @@ else
     [[ "$num_fg" != "$win_fg" ]] && inactive_label="$window_number#[fg=${win_fg}]#W"
 fi
 # Focus (active window)
-tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] ${current_label}#{?window_zoomed_flag, 󰍉,} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+tmux set -g window-status-current-format "${open_active}#[fg=${THEME[black]},bg=${THEME[magenta]},bold] ${current_label}${current_icons} ${close_active}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # Unfocused
-tmux set -g window-status-format "${open_inactive}#[fg=${num_fg},bg=${win_bg}] ${inactive_label}#{?window_zoomed_flag, 󰍉,} ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
+tmux set -g window-status-format "${open_inactive}#[fg=${num_fg},bg=${win_bg}] ${inactive_label}${inactive_icons} ${close_inactive}#[fg=${THEME[foreground]},bg=${THEME[background]},nobold]"
 # tmux's activity/bell window styles default to `reverse`, which would flip the
 # explicit fg/bg set above (dark bg + orange fg instead of orange bg + dark fg).
 # The format already colours those windows, so neutralise the built-in styles.
